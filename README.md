@@ -1,8 +1,11 @@
 # NextBlocks #
 
-TODO Describe the plugin shortly here.
-
-TODO Provide more detailed description here.
+NextBlocks is a new block programming platform implemented as a Moodle plugin. This 
+platform will allow for the creation of custom exercises by educators, and it will 
+have a heavy focus on social perception and collaboration features. This platform 
+will support features that are uncommon in block programming environments, with the 
+added convenience of being implemented in a platform that many students already use 
+regularly.
 
 ## Installing via uploaded ZIP file ##
 
