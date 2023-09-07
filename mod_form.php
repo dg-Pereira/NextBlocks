@@ -68,8 +68,25 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         // Adding the rest of mod_nextblocks settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
-        $mform->addElement('static', 'label1', 'nextblockssettings', get_string('nextblockssettings', 'mod_nextblocks'));
-        $mform->addElement('header', 'nextblocksfieldset', get_string('nextblocksfieldset', 'mod_nextblocks'));
+        $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
+        $mform->addElement('header', 'grading', get_string('nextblockscreategrading', 'mod_nextblocks'));
+
+        //------------------------------------------------------------------------------------------------------------//
+
+        $mform->addElement('header', 'tests', get_string('nextblockscreatetests', 'mod_nextblocks'));
+        //$mform->setExpanded('tests', true);
+        $mform->addElement('text', 'testsinput', get_string('testsinput', 'mod_nextblocks'));
+        $mform->addHelpButton('testsinput', 'testsinput', 'mod_nextblocks');
+        $mform->setType('testsinput', PARAM_TEXT);
+
+        $mform->addElement('text', 'testsoutput', get_string('testsoutput', 'mod_nextblocks'));
+        $mform->addHelpButton('testsoutput', 'testsoutput', 'mod_nextblocks');
+        $mform->setType('testsoutput', PARAM_TEXT);
+
+        //------------------------------------------------------------------------------------------------------------//
+
+        $mform->addElement('header', 'customblocks', get_string('nextblockscreatecustomblocks', 'mod_nextblocks'));
+        $mform->addElement('header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks'));
 
         // Add standard elements.
         $this->standard_coursemodule_elements();

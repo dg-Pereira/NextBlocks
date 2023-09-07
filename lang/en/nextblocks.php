@@ -25,4 +25,20 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'NextBlocks';
+$string['pluginname'] = 'NextBlocks plugin';
+$string['modulename'] = 'NextBlocks';
+$string['modulenameplural'] = 'NextBlocks';
+$string['settings'] = 'NextBlocks settings';
+$string['nextblockssettings'] = 'NextBlocks settings';
+$string['nextblocksname'] = "Exercise name";
+$string['nextblocksname_help'] = "Name of the NextBlocks activity";
+$string['nextblockscreatetiming'] = "Timing";
+$string['nextblockscreategrading'] = "Grading";
+$string['nextblockscreatetests'] = "Tests";
+$string['nextblockscreatecustomblocks'] = "Custom Blocks";
+$string['nextblockscreateprimitiverestrictions'] = "Primitive Restrictions";
+$string['testsinput'] = "Input";
+$string['testsinput_help'] = "Test Input";
+$string['testsoutput'] = "Output";
+$string['testsoutput_help'] = "Test Output";
+
