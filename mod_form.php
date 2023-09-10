@@ -69,10 +69,15 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         // Adding the rest of mod_nextblocks settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
+        //<<------------------------------------------ Timing tab ------------------------------------------>>//
+
         $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
+
+        //<<------------------------------------------ Grading tab ------------------------------------------>>//
+
         $mform->addElement('header', 'grading', get_string('nextblockscreategrading', 'mod_nextblocks'));
 
-        //------------------------------------------------------------------------------------------------------------------------//
+        //<<------------------------------------------ Tests tab ------------------------------------------>>//
 
         $mform->addElement('header', 'tests', get_string('nextblockscreatetests', 'mod_nextblocks'));
         //$mform->setExpanded('tests', true);
@@ -84,14 +89,14 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         $mform->addHelpButton('testsoutput', 'testsoutput', 'mod_nextblocks');
         $mform->setType('testsoutput', PARAM_TEXT);
 
-        //------------------------------------------------------------------------------------------------------------------------//
+        //<<------------------------------------------ Custom Blocks tab ------------------------------------------>>//
 
         $mform->addElement('header', 'customblocks', get_string('nextblockscreatecustomblocks', 'mod_nextblocks'));
         $mform->addElement('text', 'customblocksinput', get_string('customblocksinput', 'mod_nextblocks'));
         $mform->addHelpButton('customblocksinput', 'customblocksinput', 'mod_nextblocks');
         $mform->setType('customblocksinput', PARAM_TEXT);
 
-        //------------------------------------------------------------------------------------------------------------------------//
+        //<<------------------------------------------ Primitive Restricions tab ------------------------------------------>>//
 
         $mform->addElement(
             'header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks')
