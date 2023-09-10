@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+global $DB, $OUTPUT, $PAGE;
 
 /**
  * Prints an instance of mod_nextblocks.
@@ -21,6 +22,8 @@
  * @copyright   2023 Duarte Pereira<dg.pereira@campus.fct.unl.pt>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use event\course_module_viewed;
 
 require(__DIR__.'/../../config.php');
 require_once(__DIR__.'/lib.php');
@@ -45,13 +48,17 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
-$event = \mod_nextblocks\event\course_module_viewed::create(array(
-    'objectid' => $moduleinstance->id,
-    'context' => $modulecontext
-));
-$event->add_record_snapshot('course', $course);
-$event->add_record_snapshot('nextblocks', $moduleinstance);
-$event->trigger();
+//$event = course_module_viewed::create(array(
+//    'objectid' => $moduleinstance->id,
+//    'context' => $modulecontext
+//));
+//$event->add_record_snapshot('course', $course);
+//$event->add_record_snapshot('nextblocks', $moduleinstance);
+//$event->trigger();
+
+echo '<script src="/moodle/node_modules/blockly/blockly_compressed.js"></script>
+<script src="/moodle/node_modules/blockly/blocks_compressed.js"></script>
+<script src="/moodle/node_modules/blockly/msg/en.js"></script>';
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
@@ -60,4 +67,53 @@ $PAGE->set_context($modulecontext);
 
 echo $OUTPUT->header();
 
+echo $OUTPUT->heading("test");
+
+echo '<div id="blocklyDiv"></div>';
+
 echo $OUTPUT->footer();
+
+echo '
+<script>
+const toolbox = {
+  "kind": "flyoutToolbox",
+  "contents": [
+    {
+      "kind": "block",
+      "type": "controls_if"
+    },
+    {
+      "kind" : "block",
+      "type" : "logic_compare"
+    },
+    {
+      "kind": "block",
+      "type": "controls_repeat_ext"
+    },
+    {
+      "kind": "block",
+      "type": "math_number",
+      "fields": {
+        "NUM": 123
+      }
+    },
+    {
+      "kind": "block",
+      "type": "math_arithmetic"
+    },
+    {
+      "kind": "block",
+      "type": "text"
+    },
+    {
+      "kind" : "block",
+      "type" : "text_print"
+    }
+  ]
+};
+
+const demoWorkspace = Blockly.inject("blocklyDiv",
+    {media: "./node_modules/blockly/media/",
+     toolbox: toolbox});
+</script>
+';

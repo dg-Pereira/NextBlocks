@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+global $CFG;
 
 /**
  * The main mod_nextblocks configuration form.
@@ -24,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot.'/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/course/moodleform_mod.php');
 
 /**
  * Module instance settings form.
@@ -71,7 +72,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
         $mform->addElement('header', 'grading', get_string('nextblockscreategrading', 'mod_nextblocks'));
 
-        //------------------------------------------------------------------------------------------------------------//
+        //------------------------------------------------------------------------------------------------------------------------//
 
         $mform->addElement('header', 'tests', get_string('nextblockscreatetests', 'mod_nextblocks'));
         //$mform->setExpanded('tests', true);
@@ -83,10 +84,18 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         $mform->addHelpButton('testsoutput', 'testsoutput', 'mod_nextblocks');
         $mform->setType('testsoutput', PARAM_TEXT);
 
-        //------------------------------------------------------------------------------------------------------------//
+        //------------------------------------------------------------------------------------------------------------------------//
 
         $mform->addElement('header', 'customblocks', get_string('nextblockscreatecustomblocks', 'mod_nextblocks'));
-        $mform->addElement('header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks'));
+        $mform->addElement('text', 'customblocksinput', get_string('customblocksinput', 'mod_nextblocks'));
+        $mform->addHelpButton('customblocksinput', 'customblocksinput', 'mod_nextblocks');
+        $mform->setType('customblocksinput', PARAM_TEXT);
+
+        //------------------------------------------------------------------------------------------------------------------------//
+
+        $mform->addElement(
+            'header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks')
+        );
 
         // Add standard elements.
         $this->standard_coursemodule_elements();
