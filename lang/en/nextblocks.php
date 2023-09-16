@@ -43,4 +43,3 @@ $string['testsoutput'] = "Output";
 $string['testsoutput_help'] = "Test Output";
 $string['customblocksinput'] = "Custom Block Code";
 $string['customblocksinput_help'] = "Code for the custom block. <br> For information on how to write a custom block visit www.google.com";
-
