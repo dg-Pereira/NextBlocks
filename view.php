@@ -74,8 +74,33 @@ $PAGE->set_context($modulecontext);
 
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading("test");
+echo $OUTPUT->heading("Square Numbers");
 
-echo '<div id="blocklyDiv"></div>';
+//text of the exercise
+echo '<p>Write a program that prints the square of the number provided as input.</p>';
+
+echo '<div class="container mt-6 mb-6">
+    <div class="row">
+        <div id="blocklyDiv" class="col-md-8"></div>
+        <div class="col-md-4">
+            <img src="pix/opinion.png" alt="Dummy opinion image">
+        </div>
+    </div>
+</div>';
+
+//make submit and cancel buttons centered
+echo '<div style="text-align: center;">';
+
+echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
+echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';
+
+echo '</div>';
+
+//make horizontal separator
+echo '<hr>';
+
+echo '<div style="text-align: center;">';
+echo '<img src="pix/chat.png" alt="Dummy chat image">';
+echo '</div>';
 
 echo $OUTPUT->footer();

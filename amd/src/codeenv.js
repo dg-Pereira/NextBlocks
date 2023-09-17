@@ -24,6 +24,11 @@ const toolbox = {
           'kind': 'block',
           'type': 'controls_if',
         },
+        {
+          'kind': 'block',
+          'type': 'controls_repeat_ext',
+        },
+
       ],
     },
     {
@@ -46,6 +51,34 @@ const toolbox = {
     },
     {
       'kind': 'category',
+      'name': 'Math',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'math_number',
+        },
+        {
+          'kind': 'block',
+          'type': 'math_arithmetic',
+        },
+      ],
+    },
+    {
+      'kind': 'category',
+      'name': 'Text',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'text',
+        },
+        {
+          'kind': 'block',
+          'type': 'text_print',
+        },
+      ],
+    },
+    {
+      'kind': 'category',
       'name': 'Variables',
       'custom': 'VARIABLE',
     },
@@ -54,5 +87,25 @@ const toolbox = {
       'name': 'Functions',
       'custom': 'PROCEDURE',
     },
+    {
+      'kind': 'category',
+      'name': 'Input',
+      'contents': [
+        {
+          'kind': 'block',
+          'type': 'number_input',
+        },
+      ],
+    },
   ],
+};
+
+Blockly.Blocks['number_input'] = {
+  init: function() {
+    this.appendDummyInput().appendField('number input').appendField(new Blockly.FieldNumber(0), 'number_input');
+    this.setOutput(true, 'Number');
+    this.setColour(240);
+    this.setTooltip('Number input tooltip');
+    this.setHelpUrl('www.google.com');
+  },
 };
