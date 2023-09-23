@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-global $DB, $OUTPUT, $PAGE, $CFG;
+global $DB, $OUTPUT, $PAGE, $CFG, $page;
 
 /**
  * Prints an instance of mod_nextblocks.
@@ -74,10 +74,15 @@ $PAGE->set_context($modulecontext);
 
 echo $OUTPUT->header();
 
-echo $OUTPUT->heading("Square Numbers");
+$cmid = $PAGE->cm->id;
+$cm = get_coursemodule_from_id('nextblocks', $cmid, 0, false, MUST_EXIST);
+$instanceid = $cm->instance;
 
-//text of the exercise
-echo '<p>Write a program that prints the square of the number provided as input.</p>';
+$title = $DB->get_field('nextblocks', 'name', array('id' => $instanceid));
+$description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid));
+
+echo $OUTPUT->heading($title);
+echo '<p>' . $description . '</p>';
 
 echo '<div class="container mt-6 mb-6">
     <div class="row">

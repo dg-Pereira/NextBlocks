@@ -28,14 +28,15 @@ defined('MOODLE_INTERNAL') || die();
  * Return if the plugin supports $feature.
  *
  * @param string $feature Constant representing the feature.
+ *
  * @return true | null True if the feature is supported, null otherwise.
  */
 function nextblocks_supports($feature) {
     switch ($feature) {
-        case FEATURE_MOD_INTRO:
-            return true;
-        default:
-            return null;
+    case FEATURE_MOD_INTRO:
+        return true;
+    default:
+        return null;
     }
 }
 
@@ -46,8 +47,9 @@ function nextblocks_supports($feature) {
  * in mod_form.php) this function will create a new instance and return the id
  * number of the instance.
  *
- * @param object $moduleinstance An object from the form.
- * @param mod_nextblocks_mod_form $mform The form.
+ * @param object                  $moduleinstance An object from the form.
+ * @param mod_nextblocks_mod_form $mform          The form.
+ *
  * @return int The id of the newly inserted record.
  */
 function nextblocks_add_instance($moduleinstance, $mform = null) {
@@ -66,8 +68,9 @@ function nextblocks_add_instance($moduleinstance, $mform = null) {
  * Given an object containing all the necessary data (defined in mod_form.php),
  * this function will update an existing instance with new data.
  *
- * @param object $moduleinstance An object from the form in mod_form.php.
- * @param mod_nextblocks_mod_form $mform The form.
+ * @param object                  $moduleinstance An object from the form in mod_form.php.
+ * @param mod_nextblocks_mod_form $mform          The form.
+ *
  * @return bool True if successful, false otherwise.
  */
 function nextblocks_update_instance($moduleinstance, $mform = null) {
@@ -83,6 +86,7 @@ function nextblocks_update_instance($moduleinstance, $mform = null) {
  * Removes an instance of the mod_nextblocks from the database.
  *
  * @param int $id Id of the module instance.
+ *
  * @return bool True if successful, false on failure.
  */
 function nextblocks_delete_instance($id) {
@@ -96,4 +100,13 @@ function nextblocks_delete_instance($id) {
     $DB->delete_records('nextblocks', array('id' => $id));
 
     return true;
+}
+
+function console_log($output, $with_script_tags = true) {
+    $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) .
+        ');';
+    if ($with_script_tags) {
+        $js_code = '<script>' . $js_code . '</script>';
+    }
+    echo $js_code;
 }
