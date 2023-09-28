@@ -45,3 +45,4 @@ $string['customblocksinput'] = "Custom Block Code";
 $string['customblocksinput_help'] = "Code for the custom block. <br> For information on how to write a custom block visit www.google.com";
 $string['nextblocks_submit'] = "Submit";
 $string['nextblocks_cancel'] = "Cancel";
+$string['nextblocks_run'] = "Run";

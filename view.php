@@ -62,8 +62,17 @@ $modulecontext = context_module::instance($cm->id);
 
 //$PAGE->requires->js(new moodle_url('/mod/nextblocks/amd/src/codeenv.js'));
 
-echo '<script src="./blockly/blockly_compressed.js"></script><script src="./blockly/blocks_compressed.js">
-    </script><script src="./blockly/javascript_compressed.js"></script><script src="./blockly/msg/en.js"></script>';
+/*
+echo '<script src="./blockly/javascript_compressed.js"></script>
+    <script src="./blockly/blockly_compressed.js"></script>
+    <script src="./blockly/blocks_compressed.js"></script>
+    <script src="./blockly/msg/en.js"></script>';
+*/
+
+echo '<script src="./blockly/blockly_compressed.js"></script>
+    <script src="./blockly/blocks_compressed.js"></script>
+    <script src="./blockly/msg/en.js"></script>
+    <script src="./blockly/javascript_compressed.js"></script>';
 
 $PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init');
 
@@ -92,6 +101,9 @@ echo '<div class="container mt-6 mb-6">
         </div>
     </div>
 </div>';
+
+echo '<div style="text-align: center;">';
+echo '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
 
 //make submit and cancel buttons centered
 echo '<div style="text-align: center;">';
