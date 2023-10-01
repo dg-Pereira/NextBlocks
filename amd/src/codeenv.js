@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {injectInputBox} from "./lib";
+import {injectInputBox, replaceCode} from "./lib";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -92,7 +92,7 @@ const toolbox = {
             'contents': [
                 {
                     'kind': 'block',
-                    'type': 'number_input',
+                    'type': 'text_input',
                 },
             ],
         },
@@ -112,9 +112,9 @@ export const init = () => {
  */
 function runCode() {
     const code = javascript.javascriptGenerator.workspaceToCode(workspace);
+    replaceCode(code);
     // eslint-disable-next-line no-eval
     eval(code);
-    injectInputBox();
 }
 
 Blockly.Blocks['text_input'] = {
@@ -128,26 +128,17 @@ Blockly.Blocks['text_input'] = {
     }
 };
 
-/*
-Blockly.Blocks.number_input = {
-    init: function() {
-        this.appendDummyInput().appendField('number input').appendField(new Blockly.FieldNumber(0), 'number_input');
-        this.setOutput(true, 'Number');
-        this.setColour(240);
-        this.setTooltip('Number input tooltip');
-        this.setHelpUrl('www.google.com');
-    },
-};
+// eslint-disable-next-line no-unused-vars
+javascript.javascriptGenerator.forBlock['text_input'] = function(block, generator) {
+    // Spawn text input box
+    injectInputBox(1);
 
-Blockly.Blocks.text_input = {
-    init: function() {
-        this.appendDummyInput()
-            .appendField(new Blockly.FieldLabelSerializable("text input"), "text_input");
-        this.setOutput(true, "String");
-        this.setColour(285);
-        this.setTooltip("");
-        this.setHelpUrl("");
-    }
+    // TODO: find way to wait for input from text box
+    const code = "(function() {" +
+        "let inputString = '';" +
+        "const button = document.getElementById('programInputButton1');" +
+        "button.addEventListener('click', () => {inputString = document.getElementById('programInputBox1').value;});" +
+        "return inputString;" +
+        "})()";
+    return [code, Blockly.JavaScript.ORDER_NONE];
 };
-
-*/

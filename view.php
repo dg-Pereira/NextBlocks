@@ -95,12 +95,17 @@ echo '<p>' . $description . '</p>';
 
 echo '<div class="container mt-6 mb-6">
     <div class="row">
-        <div id="blocklyDiv" class="col-md-8"></div>
-        <div class="col-md-4">
+    <div class="col-md-8">
+        <div id="blocklyDiv" class="col-md-12"></div>
+    </div>
+    <div class="col-md-4">
             <img src="pix/opinion.png" alt="Dummy opinion image">
-        </div>
+    </div>
     </div>
 </div>';
+
+//make div for displaying static code text
+echo '<div id="codeDiv" class="container mt-6 mb-6"></div>';
 
 echo '<div style="text-align: center;">';
 echo '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
