@@ -112,13 +112,12 @@ export const init = () => {
  */
 function runCode() {
     const code = javascript.javascriptGenerator.workspaceToCode(workspace);
-    alert(code);
     replaceCode(code);
     // eslint-disable-next-line no-eval
     eval(code);
 }
 
-Blockly.Blocks['text_input'] = {
+Blockly.Blocks.text_input = {
     init: function() {
         this.appendDummyInput()
             .appendField(new Blockly.FieldLabelSerializable("text input"), "text_input");
@@ -130,7 +129,7 @@ Blockly.Blocks['text_input'] = {
 };
 
 // eslint-disable-next-line no-unused-vars
-javascript.javascriptGenerator.forBlock['text_input'] = function(block, generator) {
+javascript.javascriptGenerator.forBlock.text_input = function(block, generator) {
     // Spawn text input box
     injectInputBox(1);
 
@@ -139,14 +138,14 @@ javascript.javascriptGenerator.forBlock['text_input'] = function(block, generato
         `(function() {
             let inputString = '';
             const button = document.getElementById('programInputButton1');
-            const input = (async function() {
-                return new Promise((resolve, reject) => {
-                    button.addEventListener('click', () => {
-                        inputString = document.getElementById('programInputBox1').value;
-                    });
-                    resolve(inputString);
-                });
-            })();
+            clicked = false;
+            button.addEventListener('click', () => {
+                inputString = document.getElementById('programInputBox1').value;
+                clicked = true;
+            });
+            while (!clicked) {
+                // Wait for input
+            }
             return inputString;
         })()`;
     return [code, Blockly.JavaScript.ORDER_NONE];

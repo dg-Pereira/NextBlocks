@@ -43,5 +43,5 @@ export const replaceCode = (code) => {
  * @returns {String} the formatted code
  */
 const formatCodeHTML = (code) => {
-    return code;
+    return '<pre>' + code + ';</pre>';
 };
