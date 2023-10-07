@@ -112,7 +112,6 @@ export const init = () => {
  */
 function runCode() {
     const code = javascript.javascriptGenerator.workspaceToCode(workspace);
-    alert(code);
     replaceCode(code);
     // eslint-disable-next-line no-eval
     eval(code);
@@ -132,22 +131,13 @@ Blockly.Blocks['text_input'] = {
 // eslint-disable-next-line no-unused-vars
 javascript.javascriptGenerator.forBlock['text_input'] = function(block, generator) {
     // Spawn text input box
-    injectInputBox(1);
+    //injectInputBox(1);
 
     // TODO: find way to wait for input from text box
-    const code =
-        `(function() {
-            let inputString = '';
-            const button = document.getElementById('programInputButton1');
-            const input = (async function() {
-                return new Promise((resolve, reject) => {
-                    button.addEventListener('click', () => {
-                        inputString = document.getElementById('programInputBox1').value;
-                    });
-                    resolve(inputString);
-                });
-            })();
-            return inputString;
-        })()`;
+    const code = `(function() {
+    let input = prompt("Input:");
+    return input;
+})()`;
+
     return [code, Blockly.JavaScript.ORDER_NONE];
 };

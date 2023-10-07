@@ -39,9 +39,10 @@ export const replaceCode = (code) => {
 /**
  * Formats the code with correct html structure to be displayed in the code div
  * TODO: implement this function
- * @param {String} code the code text to be formatted
+ * @param {String} code the code text to be formatted (string literal)
  * @returns {String} the formatted code
  */
 const formatCodeHTML = (code) => {
-    return code;
+    //code is string literal
+    return "<pre>" + code + "</pre>";
 };
