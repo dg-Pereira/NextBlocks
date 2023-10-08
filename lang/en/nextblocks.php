@@ -46,3 +46,4 @@ $string['customblocksinput_help'] = "Code for the custom block. <br> For informa
 $string['nextblocks_submit'] = "Submit";
 $string['nextblocks_cancel'] = "Cancel";
 $string['nextblocks_run'] = "Run";
+$string['nextblocks_save'] = "Save";
