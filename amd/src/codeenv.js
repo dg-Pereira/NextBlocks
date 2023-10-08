@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {injectInputBox, replaceCode} from "./lib";
+import {replaceCode} from "./lib";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -94,6 +94,10 @@ const toolbox = {
                     'kind': 'block',
                     'type': 'text_input',
                 },
+                {
+                    'kind': 'block',
+                    'type': 'text_multiline_input',
+                },
             ],
         },
     ],
@@ -120,7 +124,22 @@ function runCode() {
 Blockly.Blocks.text_input = {
     init: function() {
         this.appendDummyInput()
-            .appendField(new Blockly.FieldLabelSerializable("text input"), "text_input");
+            .appendField("text input:")
+            .appendField(new Blockly.FieldTextInput('text'),
+                'text_input');
+        this.setOutput(true, "String");
+        this.setColour(285);
+        this.setTooltip("");
+        this.setHelpUrl("");
+    }
+};
+
+Blockly.Blocks.text_multiline_input = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("multiline text input:")
+            .appendField(new Blockly.FieldMultilineInput('multiline \n text'),
+                'text_input');
         this.setOutput(true, "String");
         this.setColour(285);
         this.setTooltip("");
@@ -130,23 +149,14 @@ Blockly.Blocks.text_input = {
 
 // eslint-disable-next-line no-unused-vars
 javascript.javascriptGenerator.forBlock.text_input = function(block, generator) {
-    // Spawn text input box
-    injectInputBox(1);
+    const text = block.getFieldValue('text_input');
+    let code = '"' + text + '"';
+    return [code, Blockly.JavaScript.ORDER_NONE];
+};
 
-    // TODO: find way to wait for input from text box
-    const code =
-        `(function() {
-            let inputString = '';
-            const button = document.getElementById('programInputButton1');
-            clicked = false;
-            button.addEventListener('click', () => {
-                inputString = document.getElementById('programInputBox1').value;
-                clicked = true;
-            });
-            while (!clicked) {
-                // Wait for input
-            }
-            return inputString;
-        })()`;
+// eslint-disable-next-line no-unused-vars
+javascript.javascriptGenerator.forBlock.text_multiline_input = function(block, generator) {
+    const text = block.getFieldValue('text_input');
+    let code = "`" + text + "`";
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
