@@ -48,27 +48,6 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
-//$event = course_module_viewed::create(array(
-//    'objectid' => $moduleinstance->id,
-//    'context' => $modulecontext
-//));
-//$event->add_record_snapshot('course', $course);
-//$event->add_record_snapshot('nextblocks', $moduleinstance);
-//$event->trigger();
-
-//echo '<script src="/moodle/node_modules/blockly/blockly_compressed.js"></script>
-//<script src="/moodle/node_modules/blockly/blocks_compressed.js"></script>
-//<script src="/moodle/node_modules/blockly/msg/en.js"></script>';
-
-//$PAGE->requires->js(new moodle_url('/mod/nextblocks/amd/src/codeenv.js'));
-
-/*
-echo '<script src="./blockly/javascript_compressed.js"></script>
-    <script src="./blockly/blockly_compressed.js"></script>
-    <script src="./blockly/blocks_compressed.js"></script>
-    <script src="./blockly/msg/en.js"></script>';
-*/
-
 echo '<script src="./blockly/blockly_compressed.js"></script>
     <script src="./blockly/blocks_compressed.js"></script>
     <script src="./blockly/msg/en.js"></script>
