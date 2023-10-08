@@ -9,6 +9,8 @@
 
 /* globals javascript */
 
+import {replaceCode} from "./lib";
+
 const toolbox = {
     'kind': 'categoryToolbox',
     'readOnly': true,
@@ -90,7 +92,11 @@ const toolbox = {
             'contents': [
                 {
                     'kind': 'block',
-                    'type': 'number_input',
+                    'type': 'text_input',
+                },
+                {
+                    'kind': 'block',
+                    'type': 'text_multiline_input',
                 },
             ],
         },
@@ -100,7 +106,6 @@ let workspace;
 
 export const init = () => {
     workspace = Blockly.inject('blocklyDiv', {toolbox: toolbox});
-    //workspace.addChangeListener(updateCode);
 
     var runButton = document.getElementById('runButton');
     runButton.addEventListener('click', runCode);
@@ -111,41 +116,47 @@ export const init = () => {
  */
 function runCode() {
     const code = javascript.javascriptGenerator.workspaceToCode(workspace);
+    replaceCode(code);
     // eslint-disable-next-line no-eval
     eval(code);
 }
 
-const supportedEvents = new Set([
-    Blockly.Events.BLOCK_CHANGE,
-    Blockly.Events.BLOCK_CREATE,
-    Blockly.Events.BLOCK_DELETE,
-    Blockly.Events.BLOCK_MOVE,
-]);
-
-/**
- * @param {Abstract} event
- */
-// eslint-disable-next-line no-unused-vars
-function updateCode(event) {
-    if (workspace.isDragging()) {
-        return;
-    }
-
-    // Don't update while changes are happening.
-    if (!supportedEvents.has(event.type)) {
-        return;
-    }
-
-    // eslint-disable-next-line no-unused-vars
-    const code = javascript.javascriptGenerator.workspaceToCode(workspace);
-}
-
-Blockly.Blocks.number_input = {
+Blockly.Blocks.text_input = {
     init: function() {
-        this.appendDummyInput().appendField('number input').appendField(new Blockly.FieldNumber(0), 'number_input');
-        this.setOutput(true, 'Number');
-        this.setColour(240);
-        this.setTooltip('Number input tooltip');
-        this.setHelpUrl('www.google.com');
-    },
+        this.appendDummyInput()
+            .appendField("text input:")
+            .appendField(new Blockly.FieldTextInput('text'),
+                'text_input');
+        this.setOutput(true, "String");
+        this.setColour(285);
+        this.setTooltip("");
+        this.setHelpUrl("");
+    }
+};
+
+Blockly.Blocks.text_multiline_input = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("multiline text input:")
+            .appendField(new Blockly.FieldMultilineInput('multiline \n text'),
+                'text_input');
+        this.setOutput(true, "String");
+        this.setColour(285);
+        this.setTooltip("");
+        this.setHelpUrl("");
+    }
+};
+
+// eslint-disable-next-line no-unused-vars
+javascript.javascriptGenerator.forBlock.text_input = function(block, generator) {
+    const text = block.getFieldValue('text_input');
+    let code = '"' + text + '"';
+    return [code, Blockly.JavaScript.ORDER_NONE];
+};
+
+// eslint-disable-next-line no-unused-vars
+javascript.javascriptGenerator.forBlock.text_multiline_input = function(block, generator) {
+    const text = block.getFieldValue('text_input');
+    let code = "`" + text + "`";
+    return [code, Blockly.JavaScript.ORDER_NONE];
 };
