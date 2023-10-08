@@ -72,6 +72,9 @@ $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid))
 echo $OUTPUT->heading($title);
 echo '<p>' . $description . '</p>';
 
+//make horizontal separator
+echo '<hr>';
+
 echo '<div class="container mt-6 mb-6">
     <div class="row">
     <div class="col-md-8">
@@ -86,12 +89,11 @@ echo '<div class="container mt-6 mb-6">
 //make div for displaying static code text
 echo '<div id="codeDiv" class="container mt-6 mb-6"></div>';
 
+//make buttons centered
 echo '<div style="text-align: center;">';
+
 echo '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
-
-//make submit and cancel buttons centered
-echo '<div style="text-align: center;">';
-
+echo '<input id="saveButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_save", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';
 
