@@ -48,10 +48,19 @@ require_login($course, true, $cm);
 
 $modulecontext = context_module::instance($cm->id);
 
+//import css
+echo '<link rel="stylesheet" href="styles.css">';
+//import icons
+echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">';
+
+//import blockly
 echo '<script src="./blockly/blockly_compressed.js"></script>
     <script src="./blockly/blocks_compressed.js"></script>
     <script src="./blockly/msg/en.js"></script>
     <script src="./blockly/javascript_compressed.js"></script>';
+
+//import custom category
+//echo '<script src="./amd/src/custom_category.js"></script>';
 
 $PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init');
 
@@ -75,14 +84,15 @@ echo '<p>' . $description . '</p>';
 //make horizontal separator
 echo '<hr>';
 
-echo '<div class="container mt-6 mb-6">
-    <div class="row">
-    <div class="col-md-8">
-        <div id="blocklyDiv" class="col-md-12"></div>
-    </div>
-    <div class="col-md-4">
-            <img src="pix/opinion.png" alt="Dummy opinion image">
-    </div>
+
+echo '<div class="container mt-6 mb-6 h-50">
+    <div class="row h-100">
+        <div class="col-md-10 h-100">
+            <div id="blocklyDiv" class="col-md-12 h-100"></div>
+        </div>
+        <div class="col-md-2">
+                <img src="pix/opinion.png" alt="Dummy opinion image">
+        </div>
     </div>
 </div>';
 

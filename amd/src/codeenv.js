@@ -16,24 +16,22 @@ const toolbox = {
     'readOnly': true,
     'contents': [
         {
+            'kind': 'toolboxlabel',
+            'name': 'NextBlocks',
+            'colour': 'darkslategrey'
+        },
+        {
             'kind': 'category',
-            'name': 'Control',
+            'name': 'Logic',
+            'colour': '5b80a5',
+            "cssConfig": {
+                'icon': 'customIcon fa fa-cog',
+            },
             'contents': [
                 {
                     'kind': 'block',
                     'type': 'controls_if',
                 },
-                {
-                    'kind': 'block',
-                    'type': 'controls_repeat_ext',
-                },
-
-            ],
-        },
-        {
-            'kind': 'category',
-            'name': 'Logic',
-            'contents': [
                 {
                     'kind': 'block',
                     'type': 'logic_compare',
@@ -51,6 +49,10 @@ const toolbox = {
         {
             'kind': 'category',
             'name': 'Math',
+            'colour': '5b67a5',
+            "cssConfig": {
+                'icon': 'customIcon fa-solid fa-plus-minus',
+            },
             'contents': [
                 {
                     'kind': 'block',
@@ -65,6 +67,10 @@ const toolbox = {
         {
             'kind': 'category',
             'name': 'Text',
+            'colour': '5ba58c',
+            "cssConfig": {
+                'icon': 'customIcon fa-solid fa-font',
+            },
             'contents': [
                 {
                     'kind': 'block',
@@ -79,16 +85,28 @@ const toolbox = {
         {
             'kind': 'category',
             'name': 'Variables',
+            'colour': 'a55b80',
+            "cssConfig": {
+                'icon': 'customIcon fa-solid fa-clipboard-list',
+            },
             'custom': 'VARIABLE',
         },
         {
             'kind': 'category',
             'name': 'Functions',
+            'colour': '995ba5',
+            "cssConfig": {
+                'icon': 'customIcon fa-solid fa-code',
+            },
             'custom': 'PROCEDURE',
         },
         {
             'kind': 'category',
             'name': 'Input',
+            'colour': '180',
+            "cssConfig": {
+                'icon': 'customIcon fa-solid fa-keyboard',
+            },
             'contents': [
                 {
                     'kind': 'block',
@@ -160,7 +178,7 @@ Blockly.Blocks.text_input = {
             .appendField(new Blockly.FieldTextInput('text'),
                 'text_input');
         this.setOutput(true, "String");
-        this.setColour(285);
+        this.setColour(180);
         this.setTooltip("");
         this.setHelpUrl("");
     }
@@ -173,7 +191,7 @@ Blockly.Blocks.text_multiline_input = {
             .appendField(new Blockly.FieldMultilineInput('multiline \n text'),
                 'text_input');
         this.setOutput(true, "String");
-        this.setColour(285);
+        this.setColour(180);
         this.setTooltip("");
         this.setHelpUrl("");
     }
@@ -192,3 +210,72 @@ javascript.javascriptGenerator.forBlock.text_multiline_input = function(block, g
     let code = "`" + text + "`";
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
+
+class CustomCategory extends Blockly.ToolboxCategory {
+    /**
+     * Constructor for a custom category.
+     * @override
+     */
+    constructor(categoryDef, toolbox, optParent) {
+        super(categoryDef, toolbox, optParent);
+    }
+
+    /** @override */
+    addColourBorder_(colour){
+        this.rowDiv_.style.backgroundColor = colour;
+    }
+
+    /** @override */
+    setSelected(isSelected) {
+        // We do not store the label span on the category, so use getElementsByClassName.
+        var labelDom = this.rowDiv_.getElementsByClassName('blocklyTreeLabel')[0];
+        if (isSelected) {
+            // Change the background color of the div to white.
+            this.rowDiv_.style.backgroundColor = 'white';
+            // Set the colour of the text to the colour of the category.
+            labelDom.style.color = this.colour_;
+            this.iconDom_.style.color = this.colour_;
+        } else {
+            // Set the background back to the original colour.
+            this.rowDiv_.style.backgroundColor = this.colour_;
+            // Set the text back to white.
+            labelDom.style.color = 'white';
+            this.iconDom_.style.color = 'white';
+        }
+        // This is used for accessibility purposes.
+        Blockly.utils.aria.setState(/** @type {!Element} */ (this.htmlDiv_),
+            Blockly.utils.aria.State.SELECTED, isSelected);
+    }
+}
+
+class ToolboxLabel extends Blockly.ToolboxItem {
+    constructor(toolboxItemDef, parentToolbox) {
+        super(toolboxItemDef, parentToolbox);
+    }
+
+    /** @override */
+    init() {
+        // Create the label.
+        this.label = document.createElement('label');
+
+        // Set the name.
+        this.label.textContent = this.toolboxItemDef_.name;
+        // Set the color.
+        this.label.style.color = this.toolboxItemDef_.colour;
+    }
+
+    /** @override */
+    getDiv() {
+        return this.label;
+    }
+}
+
+Blockly.registry.register(
+    Blockly.registry.Type.TOOLBOX_ITEM,
+    'toolboxlabel',
+    ToolboxLabel);
+
+Blockly.registry.register(
+    Blockly.registry.Type.TOOLBOX_ITEM,
+    Blockly.ToolboxCategory.registrationName,
+    CustomCategory, true);
