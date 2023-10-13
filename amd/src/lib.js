@@ -43,6 +43,6 @@ export const replaceCode = (code) => {
  * @returns {String} the formatted code
  */
 const formatCodeHTML = (code) => {
-    //code is string literal
+    // Code is string literal
     return "<pre>" + code + "</pre>";
 };

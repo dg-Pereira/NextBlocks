@@ -155,9 +155,11 @@ class mod_nextblocks_mod_form extends moodleform_mod {
             // When the form is submitted, and the data is successfully validated,
             // the `get_data()` function will return the data posted in the form.
 
-            // save iseval data to database
-            $this->save_iseval($fromform);
+            // save data to database
+            $record = $this->save_data($fromform);
 
+            //save the tests file
+            $this->save_tests_file($fromform, $record);
         } else {
             // This branch is executed if the form is submitted but the data doesn't
             // validate and the form should be redisplayed or on the first display of the form.
@@ -170,7 +172,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         }
     }
 
-    private function save_iseval(object $fromform)
+    private function save_data(object $fromform)
     {
         global $DB;
 
@@ -179,5 +181,29 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         $record->iseval = $fromform->iseval;
 
         $DB->update_record('nextblocks', $record);
+
+        return $record;
+    }
+
+    private function save_tests_file(object $fromform, stdClass $record)
+    {
+        // Save the tests file with File API.
+        // Will need a check for whether the exercise creator selected the file option or not.
+        global $PAGE;
+        file_save_draft_area_files(
+        // The $fromform->attachments property contains the itemid of the draft file area.
+            $fromform->attachments,
+
+            // The combination of contextid / component / filearea / itemid
+            // form the virtual bucket that file are stored in.
+            $PAGE->context->id,
+            'mod_nextblocks',
+            'attachment',
+            $record->id,
+            [
+                'subdirs' => 0,
+                'maxfiles' => 1,
+            ]
+        );
     }
 }
