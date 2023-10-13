@@ -63,12 +63,19 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         // Adding the standard "intro" and "introformat" fields.
         if ($CFG->branch >= 29) {
             $this->standard_intro_elements();
+
         } else {
             $this->add_intro_editor();
         }
 
         // Adding the rest of mod_nextblocks settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
+
+        //<<------------------------------------------ General tab ------------------------------------------>>//
+
+        //isEval checkbox
+        $mform->addElement('advcheckbox', 'iseval', get_string('iseval', 'mod_nextblocks'));
+        $mform->addHelpButton('iseval', 'iseval', 'mod_nextblocks');
 
         //<<------------------------------------------ Timing tab ------------------------------------------>>//
 
@@ -92,7 +99,6 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         // File option
 
-        //$mform->addElement('filepicker', 'testsfile', get_string('testsfilesubmit', 'mod_nextblocks'));
         $mform->addElement(
             'filemanager',
             'testsfile',
@@ -102,7 +108,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
                 'subdirs' => 0,
                 'areamaxbytes' => 10485760,
                 'maxfiles' => 1,
-                'accepted_types' => ['text'],
+                'accepted_types' => ['txt'],
                 'return_types' => FILE_INTERNAL | FILE_EXTERNAL,
             ]
         );
@@ -139,5 +145,39 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         // Add standard buttons.
         $this->add_action_buttons();
+
+        // Form processing and displaying is done here.
+        if ($this->is_cancelled()) {
+            // If there is a cancel element on the form, and it was pressed,
+            // then the `is_cancelled()` function will return true.
+            // You can handle the cancel operation here.
+        } else if ($fromform = $this->get_data()) {
+            // When the form is submitted, and the data is successfully validated,
+            // the `get_data()` function will return the data posted in the form.
+
+            // save iseval data to database
+            $this->save_iseval($fromform);
+
+        } else {
+            // This branch is executed if the form is submitted but the data doesn't
+            // validate and the form should be redisplayed or on the first display of the form.
+
+            // Set anydefault data (if any).
+            //$this->set_data($toform);
+
+            // Display the form.
+            //$mform->display();
+        }
+    }
+
+    private function save_iseval(object $fromform)
+    {
+        global $DB;
+
+        $record = new stdClass();
+        $record->id = $fromform->id;
+        $record->iseval = $fromform->iseval;
+
+        $DB->update_record('nextblocks', $record);
     }
 }
