@@ -84,7 +84,6 @@ echo '<p>' . $description . '</p>';
 //make horizontal separator
 echo '<hr>';
 
-
 echo '<div class="container mt-6 mb-6 h-50">
     <div class="row h-100">
         <div class="col-md-10 h-100">

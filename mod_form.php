@@ -74,6 +74,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         //<<------------------------------------------ General tab ------------------------------------------>>//
 
         //isEval checkbox
+        //if second parameter of addElement is a colunm name of the table, the value of the checkbox will be saved in that column
         $mform->addElement('advcheckbox', 'iseval', get_string('iseval', 'mod_nextblocks'));
         $mform->addHelpButton('iseval', 'iseval', 'mod_nextblocks');
 
@@ -101,7 +102,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         $mform->addElement(
             'filemanager',
-            'testsfile',
+            'attachments',
             get_string('testsfilesubmit', 'mod_nextblocks'),
             null,
             [
@@ -145,65 +146,5 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         // Add standard buttons.
         $this->add_action_buttons();
-
-        // Form processing and displaying is done here.
-        if ($this->is_cancelled()) {
-            // If there is a cancel element on the form, and it was pressed,
-            // then the `is_cancelled()` function will return true.
-            // You can handle the cancel operation here.
-        } else if ($fromform = $this->get_data()) {
-            // When the form is submitted, and the data is successfully validated,
-            // the `get_data()` function will return the data posted in the form.
-
-            // save data to database
-            $record = $this->save_data($fromform);
-
-            //save the tests file
-            $this->save_tests_file($fromform, $record);
-        } else {
-            // This branch is executed if the form is submitted but the data doesn't
-            // validate and the form should be redisplayed or on the first display of the form.
-
-            // Set anydefault data (if any).
-            //$this->set_data($toform);
-
-            // Display the form.
-            //$mform->display();
-        }
-    }
-
-    private function save_data(object $fromform)
-    {
-        global $DB;
-
-        $record = new stdClass();
-        $record->id = $fromform->id;
-        $record->iseval = $fromform->iseval;
-
-        $DB->update_record('nextblocks', $record);
-
-        return $record;
-    }
-
-    private function save_tests_file(object $fromform, stdClass $record)
-    {
-        // Save the tests file with File API.
-        // Will need a check for whether the exercise creator selected the file option or not.
-        global $PAGE;
-        file_save_draft_area_files(
-        // The $fromform->attachments property contains the itemid of the draft file area.
-            $fromform->attachments,
-
-            // The combination of contextid / component / filearea / itemid
-            // form the virtual bucket that file are stored in.
-            $PAGE->context->id,
-            'mod_nextblocks',
-            'attachment',
-            $record->id,
-            [
-                'subdirs' => 0,
-                'maxfiles' => 1,
-            ]
-        );
     }
 }
