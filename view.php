@@ -98,6 +98,21 @@ echo '<div class="container mt-6 mb-6 h-50">
 //make div for displaying static code text
 echo '<div id="codeDiv" class="container mt-6 mb-6"></div>';
 
+//display tests file
+$fs = get_file_storage();
+$filenamehash = get_filenamehash($instanceid);
+if($filenamehash != false){
+    $file = $fs->get_file_by_hash($filenamehash);
+    $contents = $file->get_content();
+    echo '<div id="testsDiv" class="container mt-6 mb-6">';
+    echo '<h3>Tests</h3>';
+    echo '<p>' . $contents . '</p>';
+    echo '</div>';
+}
+
+//display code output
+echo '<div id="outputDiv" class="container mt-6 mb-6">Program output: <br></div>';
+
 //make buttons centered
 echo '<div style="text-align: center;">';
 

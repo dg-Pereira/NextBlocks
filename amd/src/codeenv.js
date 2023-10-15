@@ -164,12 +164,45 @@ export const init = () => {
 /**
  *
  */
-function runCode() {
-    const code = javascript.javascriptGenerator.workspaceToCode(workspace);
+function silentRunCode() {
+    let code = javascript.javascriptGenerator.workspaceToCode(workspace);
+
+    const preamble = `(function () {
+    let outputString = '';\n`;
+    const postscript = `return outputString;
+})();\n`;
+    // Add a preamble and a postscript to the code.
+    code = preamble + code + postscript;
+
     replaceCode(code);
     // eslint-disable-next-line no-eval
-    eval(code);
+    return eval(code);
 }
+
+/**
+ *
+ */
+function runCode() {
+    // eslint-disable-next-line no-eval,no-console
+    const output = silentRunCode();
+
+    const outputDiv = document.getElementById('outputDiv');
+    outputDiv.innerHTML += output;
+}
+
+// eslint-disable-next-line no-unused-vars
+// Redefine the text_print block to use the outputString variable instead of alert.
+javascript.javascriptGenerator.forBlock.text_print = function(block, generator) {
+    return (
+        "outputString += " +
+        (generator.valueToCode(
+            block,
+            "TEXT",
+            Blockly.JavaScript.ORDER_NONE
+        ) || "''") +
+        ";\n"
+    );
+};
 
 Blockly.Blocks.text_input = {
     init: function() {
