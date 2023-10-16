@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {replaceCode} from "./lib";
+import {replaceCode, runTests} from "./lib";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -154,12 +154,27 @@ const options = {
 
 let workspace;
 
-export const init = () => {
+export const init = (contents) => {
     workspace = Blockly.inject('blocklyDiv', options);
 
     const runButton = document.getElementById('runButton');
     runButton.addEventListener('click', runCode);
+
+    if (contents != '') {
+        runTestsHandler(contents);
+    }
 };
+
+/**
+ * @param {String} contents the contents of the tests file
+ */
+function runTestsHandler(contents) {
+    // Listen for clicks on the run tests button
+    const runTestsButton = document.getElementById('runTestsButton');
+    runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
+        runTests(contents);
+    });
+}
 
 /**
  *
@@ -168,7 +183,7 @@ function silentRunCode() {
     let code = javascript.javascriptGenerator.workspaceToCode(workspace);
 
     const preamble = `(function () {
-    let outputString = '';\n`;
+    let outputString = \`\`;\n`;
     const postscript = `return outputString;
 })();\n`;
     // Add a preamble and a postscript to the code.
@@ -200,7 +215,7 @@ javascript.javascriptGenerator.forBlock.text_print = function(block, generator) 
             "TEXT",
             Blockly.JavaScript.ORDER_NONE
         ) || "''") +
-        ";\n"
+        "+'<br>';\n"
     );
 };
 
