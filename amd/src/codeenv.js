@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {replaceCode, runTests} from "./lib";
+import {getWorkspaceCode, parseTestsFile, replaceCode, runTests} from "./lib";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -156,50 +156,119 @@ let workspace;
 
 export const init = (contents) => {
     workspace = Blockly.inject('blocklyDiv', options);
+    // eslint-disable-next-line no-unused-vars
+    const tests = parseTestsFile(contents);
+
+    addInputBlocks(tests);
 
     const runButton = document.getElementById('runButton');
-    runButton.addEventListener('click', runCode);
+    runButton.addEventListener('click', function() {
+        const code = getWorkspaceCode(workspace);
+        runCode(code);
+    });
 
-    if (contents != '') {
-        runTestsHandler(contents);
+    if (contents !== '') {
+        runTestsHandler(tests);
     }
 };
 
 /**
- * @param {String} contents the contents of the tests file
+ * @param {{}} tests
+ * Adds the input blocks to the workspace
  */
-function runTestsHandler(contents) {
-    // Listen for clicks on the run tests button
-    const runTestsButton = document.getElementById('runTestsButton');
-    runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
-        runTests(contents);
+function addInputBlocks(tests) {
+    const test = tests[0];
+    const inputs = test.inputs;
+    const addedBlocks = [];
+
+    // Add a block for each input
+    inputs.forEach((input) => {
+        const inputName = Object.keys(input)[0];
+        addedBlocks.push(createForcedInputBlock(inputName));
+    });
+    // Move the blocks down so they don't overlap
+    addedBlocks.forEach((block, i) => {
+        block.moveBy(0, i * 50);
     });
 }
 
 /**
- *
+ * @param {String} prompt
+ * @returns {Blockly.BlockSvg} The block that was created
  */
-function silentRunCode() {
-    let code = javascript.javascriptGenerator.workspaceToCode(workspace);
+function createForcedInputBlock(prompt) {
+    const blockName = "forced_input_" + prompt;
+    Blockly.Blocks[blockName] = {
+        init: function () {
+            this.appendDummyInput()
+                .appendField(prompt)
+                .appendField(new Blockly.FieldTextInput('text'), prompt);
+            this.setOutput(true, "String");
+            this.setDeletable(false);
+            this.setColour(180);
+            this.setTooltip("");
+            this.setHelpUrl("");
+        }
+    };
 
-    const preamble = `(function () {
-    let outputString = \`\`;\n`;
-    const postscript = `return outputString;
-})();\n`;
-    // Add a preamble and a postscript to the code.
-    code = preamble + code + postscript;
+    // eslint-disable-next-line no-unused-vars
+    javascript.javascriptGenerator.forBlock[blockName] = function (block, generator) {
+        const text = block.getFieldValue(prompt);
+        //let code = '"' + text + '"';
+        let code = '(function () { let ' + prompt + ' = "' + text + '"; return ' + prompt + ';})()';
+        return [code, Blockly.JavaScript.ORDER_NONE];
+    };
 
+    const newBlock = workspace.newBlock(blockName);
+    newBlock.initSvg();
+    newBlock.render();
+
+    return newBlock;
+}
+
+/**
+ * @param {{}} tests the contents of the tests file
+ */
+function runTestsHandler(tests) {
+    // Listen for clicks on the run tests button
+    const runTestsButton = document.getElementById('runTestsButton');
+    runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
+        const results = runTests(workspace, tests);
+        displayTestResults(results);
+    });
+}
+
+/**
+ * @param {Boolean[]} results
+ */
+function displayTestResults(results) {
+    const testResultsDiv = document.getElementById('testResultsDiv');
+    testResultsDiv.innerHTML = '';
+    results.forEach((result, i) => {
+        const testResult = document.createElement('p');
+        testResult.innerHTML = 'Test ' + (i + 1) + ': ' + (result ? 'Passed' : 'Failed');
+        testResultsDiv.appendChild(testResult);
+    });
+}
+
+/**
+ * @param {String} code The Javascript code to be run
+ * @returns {*} The output of the code
+ * Runs the code and returns the output, does not display it
+ */
+function silentRunCode(code) {
     replaceCode(code);
     // eslint-disable-next-line no-eval
     return eval(code);
 }
 
 /**
- *
+ * @param {String} code The Javascript code to be run
+ * Runs the code and displays the output in the output div
  */
-function runCode() {
+function runCode(code) {
     // eslint-disable-next-line no-eval,no-console
-    const output = silentRunCode();
+    const output = silentRunCode(code);
 
     const outputDiv = document.getElementById('outputDiv');
     outputDiv.innerHTML += output;
@@ -215,7 +284,7 @@ javascript.javascriptGenerator.forBlock.text_print = function(block, generator) 
             "TEXT",
             Blockly.JavaScript.ORDER_NONE
         ) || "''") +
-        "+'<br>';\n"
+        ";\n"
     );
 };
 

@@ -113,6 +113,14 @@ if($filenamehash != false){
     echo '</div>';
 }
 
+//display test results
+if($filenamehash != false){
+    echo '<div id="testResultsDiv" class="container mt-6 mb-6">';
+    echo '<h3>Test Results</h3>';
+    echo '<p id="testResults"></p>';
+    echo '</div>';
+}
+
 //display code output
 echo '<div id="outputDiv" class="container mt-6 mb-6">Program output: <br></div>';
 
