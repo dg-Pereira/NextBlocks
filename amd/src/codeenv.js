@@ -154,23 +154,39 @@ const options = {
 
 let workspace;
 
+/**
+ * @param {String} contents
+ */
 export const init = (contents) => {
     workspace = Blockly.inject('blocklyDiv', options);
-    // eslint-disable-next-line no-unused-vars
     const tests = parseTestsFile(contents);
 
     addInputBlocks(tests);
 
+    setupButtons(tests, contents);
+};
+
+/**
+ * @param {{}} tests
+ * @param {String} contents
+ */
+function setupButtons(tests, contents) {
+    // Listen for clicks on the run button
     const runButton = document.getElementById('runButton');
     runButton.addEventListener('click', function() {
         const code = getWorkspaceCode(workspace);
         runCode(code);
     });
 
+    // Listen for clicks on the run tests button
     if (contents !== '') {
-        runTestsHandler(tests);
+        const runTestsButton = document.getElementById('runTestsButton');
+        runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
+            const results = runTests(workspace, tests);
+            displayTestResults(results);
+        });
     }
-};
+}
 
 /**
  * @param {{}} tests
@@ -224,18 +240,6 @@ function createForcedInputBlock(prompt) {
     newBlock.render();
 
     return newBlock;
-}
-
-/**
- * @param {{}} tests the contents of the tests file
- */
-function runTestsHandler(tests) {
-    // Listen for clicks on the run tests button
-    const runTestsButton = document.getElementById('runTestsButton');
-    runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
-        const results = runTests(workspace, tests);
-        displayTestResults(results);
-    });
 }
 
 /**
