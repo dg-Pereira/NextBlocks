@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/nextblocks/db" VERSION="20231015" COMMENT="XMLDB file for Moodle mod_nextblocks"
+<XMLDB PATH="mod/nextblocks/db" VERSION="20231019" COMMENT="XMLDB file for Moodle mod_nextblocks"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -19,6 +19,19 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="fk_course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="nextblocks_userdata" COMMENT="Data related to each user.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the user"/>
+        <FIELD NAME="nextblocksid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the instance of nextblocks for which data in this table is saved."/>
+        <FIELD NAME="saved_workspace" TYPE="binary" NOTNULL="false" SEQUENCE="false" COMMENT="State of the workspace when user clicks Save. Used for future restoration of user progress in the exercise."/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="mdl_user" REFFIELDS="id" COMMENT="Id of the user in mdl_user table."/>
+        <KEY NAME="nextblocksid" TYPE="foreign" FIELDS="nextblocksid" REFTABLE="mdl_nextblocks" REFFIELDS="id" COMMENT="Id of the nextblocks instance for which data is being saved."/>
       </KEYS>
     </TABLE>
   </TABLES>

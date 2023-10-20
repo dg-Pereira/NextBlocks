@@ -10,6 +10,7 @@
 /* globals javascript */
 
 import {getWorkspaceCode, parseTestsFile, replaceCode, runTests} from "./lib";
+import {submitGradingForm} from "./repository";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -152,25 +153,26 @@ const options = {
     },
 };
 
-let workspace;
+let nextblocksWorkspace;
 
 /**
  * @param {String} contents
  */
 export const init = (contents) => {
-    workspace = Blockly.inject('blocklyDiv', options);
+    nextblocksWorkspace = Blockly.inject('blocklyDiv', options);
     const tests = parseTestsFile(contents);
 
-    addInputBlocks(tests);
+    addInputBlocks(tests, nextblocksWorkspace);
 
-    setupButtons(tests, contents);
+    setupButtons(tests, contents, nextblocksWorkspace);
 };
 
 /**
  * @param {{}} tests
  * @param {String} contents
+ * @param {WorkspaceSvg} workspace
  */
-function setupButtons(tests, contents) {
+function setupButtons(tests, contents, workspace) {
     // Listen for clicks on the run button
     const runButton = document.getElementById('runButton');
     runButton.addEventListener('click', function() {
@@ -186,13 +188,34 @@ function setupButtons(tests, contents) {
             displayTestResults(results);
         });
     }
+
+    // Listen for clicks on the save button
+    const saveButton = document.getElementById('saveButton');
+    saveButton.addEventListener('click', saveState);
 }
 
 /**
- * @param {{}} tests
- * Adds the input blocks to the workspace
+ * Saves the current state of the workspace to the database, for later retrieval and display
  */
-function addInputBlocks(tests) {
+export const saveState = async() => {
+    const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
+    const stateB64 = btoa(JSON.stringify(state));
+
+    const classList = document.body.classList;
+    const cmidClass = Array.from(classList).find((className) => className.startsWith('cmid-'));
+    const cmid = parseInt(cmidClass.split('-')[1]);
+
+    const userid = 2;
+
+    await submitGradingForm(userid, cmid, stateB64);
+};
+
+/**
+ * Adds the input blocks to the workspace
+ * @param {{}} tests
+ * @param {WorkspaceSvg} workspace
+ */
+function addInputBlocks(tests, workspace) {
     const test = tests[0];
     const inputs = test.inputs;
     const addedBlocks = [];
@@ -200,7 +223,7 @@ function addInputBlocks(tests) {
     // Add a block for each input
     inputs.forEach((input) => {
         const inputName = Object.keys(input)[0];
-        addedBlocks.push(createForcedInputBlock(inputName));
+        addedBlocks.push(createForcedInputBlock(inputName, workspace));
     });
     // Move the blocks down so they don't overlap
     addedBlocks.forEach((block, i) => {
@@ -210,12 +233,13 @@ function addInputBlocks(tests) {
 
 /**
  * @param {String} prompt
+ * @param {WorkspaceSvg} workspace
  * @returns {Blockly.BlockSvg} The block that was created
  */
-function createForcedInputBlock(prompt) {
+function createForcedInputBlock(prompt, workspace) {
     const blockName = "forced_input_" + prompt;
     Blockly.Blocks[blockName] = {
-        init: function () {
+        init: function() {
             this.appendDummyInput()
                 .appendField(prompt)
                 .appendField(new Blockly.FieldTextInput('text'), prompt);
@@ -228,9 +252,9 @@ function createForcedInputBlock(prompt) {
     };
 
     // eslint-disable-next-line no-unused-vars
-    javascript.javascriptGenerator.forBlock[blockName] = function (block, generator) {
+    javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
         const text = block.getFieldValue(prompt);
-        //let code = '"' + text + '"';
+        // Let code = '"' + text + '"';
         let code = '(function () { let ' + prompt + ' = "' + text + '"; return ' + prompt + ';})()';
         return [code, Blockly.JavaScript.ORDER_NONE];
     };
@@ -342,7 +366,7 @@ class CustomCategory extends Blockly.ToolboxCategory {
     }
 
     /** @override */
-    addColourBorder_(colour){
+    addColourBorder_(colour) {
         this.rowDiv_.style.backgroundColor = colour;
     }
 
