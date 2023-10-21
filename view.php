@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-global $DB, $OUTPUT, $PAGE, $CFG, $page;
+global $DB, $OUTPUT, $PAGE, $CFG, $page, $USER;
 
 /**
  * Prints an instance of mod_nextblocks.
@@ -66,15 +66,16 @@ $cmid = $PAGE->cm->id;
 $cm = get_coursemodule_from_id('nextblocks', $cmid, 0, false, MUST_EXIST);
 $instanceid = $cm->instance;
 
+// call init, with saved workspace and tests file if they exist
+$record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cmid));
+$saved_workspace = $record ? $record->saved_workspace : null;
+
 $fs = get_file_storage();
 $filenamehash = get_filenamehash($instanceid);
-if($filenamehash != false){
-    $file = $fs->get_file_by_hash($filenamehash);
-    $contents = $file->get_content();
-    $PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$contents]);
-}else{
-    $PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', ['']);
-}
+
+$file = $fs->get_file_by_hash($filenamehash);
+$contents = $file ? $file->get_content() : null;
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$contents, $saved_workspace]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));

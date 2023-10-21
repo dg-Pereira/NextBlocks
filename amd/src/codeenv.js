@@ -10,7 +10,7 @@
 /* globals javascript */
 
 import {getWorkspaceCode, parseTestsFile, replaceCode, runTests} from "./lib";
-import {submitGradingForm} from "./repository";
+import {saveWorkspace} from "./repository";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -153,19 +153,62 @@ const options = {
     },
 };
 
+// getMainWorkspace might remove need for global variable
 let nextblocksWorkspace;
 
 /**
- * @param {String} contents
+ * @param {String} contents The contents of the tests file
+ * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
  */
-export const init = (contents) => {
+export const init = (contents, loadedSave) => {
     nextblocksWorkspace = Blockly.inject('blocklyDiv', options);
-    const tests = parseTestsFile(contents);
 
-    addInputBlocks(tests, nextblocksWorkspace);
+    const tests = contents !== null ? parseTestsFile(contents) : null;
+
+    if (tests !== null) {
+        // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
+        // was a workspace to load, they would be added twice.
+        const inputs = tests[0].inputs;
+        inputs.forEach((input, i) => {
+            const inputName = Object.keys(input)[0];
+            createForcedInputBlock(inputName); // Doesn't add block to workspace, just defines it. Needed for save loading
+
+            if (loadedSave === null) { // Only add to workspace if there is no workspace to load
+                const blockName = "forced_input_" + inputName;
+                let newBlock = addBlockToWorkspace(blockName, nextblocksWorkspace);
+                newBlock.moveBy(0, i * 50); // Move block down a bit so that they don't overlap
+            }
+        });
+    }
+
+    // Load the save, if there is one
+    if (loadedSave !== null) {
+        loadSave(loadedSave, nextblocksWorkspace);
+    }
 
     setupButtons(tests, contents, nextblocksWorkspace);
 };
+
+/**
+ * @param {String} blockName The name of the input block to be added (prompt on the left side of the block
+ * @param {WorkspaceSvg} workspace The workspace to add the input block to
+ * @returns {BlockSvg} The newly created block
+ */
+function addBlockToWorkspace(blockName, workspace) {
+    const newBlock = workspace.newBlock(blockName);
+    newBlock.initSvg();
+    newBlock.render();
+    return newBlock;
+}
+
+/**
+ * @param {String} loadedSave
+ * @param {WorkspaceSvg} workspace
+ */
+function loadSave(loadedSave, workspace) {
+    const state = JSON.parse(atob(loadedSave));
+    Blockly.serialization.workspaces.load(state, workspace);
+}
 
 /**
  * @param {{}} tests
@@ -200,43 +243,23 @@ function setupButtons(tests, contents, workspace) {
 export const saveState = async() => {
     const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
     const stateB64 = btoa(JSON.stringify(state));
-
-    const classList = document.body.classList;
-    const cmidClass = Array.from(classList).find((className) => className.startsWith('cmid-'));
-    const cmid = parseInt(cmidClass.split('-')[1]);
-
-    const userid = 2;
-
-    await submitGradingForm(userid, cmid, stateB64);
+    const cmid = getCMID();
+    await saveWorkspace(cmid, stateB64);
 };
 
 /**
- * Adds the input blocks to the workspace
- * @param {{}} tests
- * @param {WorkspaceSvg} workspace
+ *
  */
-function addInputBlocks(tests, workspace) {
-    const test = tests[0];
-    const inputs = test.inputs;
-    const addedBlocks = [];
-
-    // Add a block for each input
-    inputs.forEach((input) => {
-        const inputName = Object.keys(input)[0];
-        addedBlocks.push(createForcedInputBlock(inputName, workspace));
-    });
-    // Move the blocks down so they don't overlap
-    addedBlocks.forEach((block, i) => {
-        block.moveBy(0, i * 50);
-    });
+function getCMID() {
+    const classList = document.body.classList;
+    const cmidClass = Array.from(classList).find((className) => className.startsWith('cmid-'));
+    return parseInt(cmidClass.split('-')[1]);
 }
 
 /**
  * @param {String} prompt
- * @param {WorkspaceSvg} workspace
- * @returns {Blockly.BlockSvg} The block that was created
  */
-function createForcedInputBlock(prompt, workspace) {
+function createForcedInputBlock(prompt){
     const blockName = "forced_input_" + prompt;
     Blockly.Blocks[blockName] = {
         init: function() {
@@ -254,16 +277,9 @@ function createForcedInputBlock(prompt, workspace) {
     // eslint-disable-next-line no-unused-vars
     javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
         const text = block.getFieldValue(prompt);
-        // Let code = '"' + text + '"';
         let code = '(function () { let ' + prompt + ' = "' + text + '"; return ' + prompt + ';})()';
         return [code, Blockly.JavaScript.ORDER_NONE];
     };
-
-    const newBlock = workspace.newBlock(blockName);
-    newBlock.initSvg();
-    newBlock.render();
-
-    return newBlock;
 }
 
 /**
@@ -281,7 +297,7 @@ function displayTestResults(results) {
 
 /**
  * @param {String} code The Javascript code to be run
- * @returns {*} The output of the code
+ * @returns {any} The output of the code
  * Runs the code and returns the output, does not display it
  */
 function silentRunCode(code) {
@@ -295,7 +311,6 @@ function silentRunCode(code) {
  * Runs the code and displays the output in the output div
  */
 function runCode(code) {
-    // eslint-disable-next-line no-eval,no-console
     const output = silentRunCode(code);
 
     const outputDiv = document.getElementById('outputDiv');
