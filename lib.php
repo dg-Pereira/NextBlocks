@@ -67,6 +67,9 @@ function nextblocks_add_instance($moduleinstance, $mform = null) {
         // then the `is_cancelled()` function will return true.
         // You can handle the cancel operation here.
 
+        //redirect to course page
+        redirect(new moodle_url('/course/view.php', array('id' => $moduleinstance->course)), 'Cancelled');
+
     } else if ($fromform = $mform->get_data()) {
         // When the form is submitted, and the data is successfully validated,
         // the `get_data()` function will return the data posted in the form.
