@@ -57,6 +57,7 @@ const formatCodeHTML = (code) => {
  * @param {String} fileString the string containing the contents of the tests file
  * @returns {{}} A JSON object with the tests data
  */
+// eslint-disable-next-line no-unused-vars
 export const parseTestsFile = (fileString) => {
     try {
         // The returned object has a list of test cases

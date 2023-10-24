@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {getWorkspaceCode, parseTestsFile, replaceCode, runTests} from "./lib";
+import {getWorkspaceCode, replaceCode, runTests} from "./lib";
 import {saveWorkspace} from "./repository";
 
 const toolbox = {
@@ -163,7 +163,8 @@ let nextblocksWorkspace;
 export const init = (contents, loadedSave) => {
     nextblocksWorkspace = Blockly.inject('blocklyDiv', options);
 
-    const tests = contents !== null ? parseTestsFile(contents) : null;
+    //parse json from contents
+    const tests = JSON.parse(contents);
 
     if (tests !== null) {
         // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
