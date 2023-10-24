@@ -63,12 +63,21 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         // Adding the standard "intro" and "introformat" fields.
         if ($CFG->branch >= 29) {
             $this->standard_intro_elements();
+
         } else {
             $this->add_intro_editor();
         }
 
         // Adding the rest of mod_nextblocks settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
+
+        //<<------------------------------------------ General tab ------------------------------------------>>//
+
+        //isEval checkbox
+        //if second parameter of addElement is a colunm name of the table, the value of the checkbox will be saved in that column
+        $mform->addElement('advcheckbox', 'iseval', get_string('iseval', 'mod_nextblocks'));
+        $mform->addHelpButton('iseval', 'iseval', 'mod_nextblocks');
+
         //<<------------------------------------------ Timing tab ------------------------------------------>>//
 
         $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
@@ -81,13 +90,43 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'tests', get_string('nextblockscreatetests', 'mod_nextblocks'));
         //$mform->setExpanded('tests', true);
+
+        $radioarray=array();
+        $radioarray[] = $mform->createElement('radio', 'testsradio', '', get_string('testsradiofile', 'mod_nextblocks'), 1, '');
+        $radioarray[] = $mform->createElement('radio', 'testsradio', '', get_string('testsradiotextbox', 'mod_nextblocks'), 2, '');
+        $mform->addGroup($radioarray, 'testsradio', get_string('testsradiolabel', 'mod_nextblocks'), '<br>', false);
+        $mform->addHelpButton('testsradio', 'testsradio', 'mod_nextblocks');
+        $mform->setDefault('testsradio', 1); //both unselected
+
+        // File option
+
+        $mform->addElement(
+            'filemanager',
+            'attachments',
+            get_string('testsfilesubmit', 'mod_nextblocks'),
+            null,
+            [
+                'subdirs' => 0,
+                'areamaxbytes' => 10485760,
+                'maxfiles' => 1,
+                'accepted_types' => ['txt'],
+                'return_types' => FILE_INTERNAL | FILE_EXTERNAL,
+            ]
+        );
+        $mform->addHelpButton('testsfile', 'testsfile', 'mod_nextblocks');
+        $mform->setType('testsfile', PARAM_FILE);
+        $mform->hideIf('testsfile', 'testsradio', 'neq', 1);
+
+        // Text boxes option
         $mform->addElement('text', 'testsinput', get_string('testsinput', 'mod_nextblocks'));
         $mform->addHelpButton('testsinput', 'testsinput', 'mod_nextblocks');
         $mform->setType('testsinput', PARAM_TEXT);
+        $mform->hideIf('testsinput', 'testsradio', 'neq', 2);
 
         $mform->addElement('text', 'testsoutput', get_string('testsoutput', 'mod_nextblocks'));
         $mform->addHelpButton('testsoutput', 'testsoutput', 'mod_nextblocks');
         $mform->setType('testsoutput', PARAM_TEXT);
+        $mform->hideIf('testsoutput', 'testsradio', 'neq', 2);
 
         //<<------------------------------------------ Custom Blocks tab ------------------------------------------>>//
 

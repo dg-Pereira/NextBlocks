@@ -13,7 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-global $DB, $OUTPUT, $PAGE, $CFG, $page;
+global $DB, $OUTPUT, $PAGE, $CFG, $page, $USER;
 
 /**
  * Prints an instance of mod_nextblocks.
@@ -62,7 +62,20 @@ echo '<script src="./blockly/blockly_compressed.js"></script>
 //import custom category
 //echo '<script src="./amd/src/custom_category.js"></script>';
 
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init');
+$cmid = $PAGE->cm->id;
+$cm = get_coursemodule_from_id('nextblocks', $cmid, 0, false, MUST_EXIST);
+$instanceid = $cm->instance;
+
+// call init, with saved workspace and tests file if they exist
+$record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cmid));
+$saved_workspace = $record ? $record->saved_workspace : null;
+
+$fs = get_file_storage();
+$filenamehash = get_filenamehash($instanceid);
+
+$file = $fs->get_file_by_hash($filenamehash);
+$contents = $file ? $file->get_content() : null;
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$contents, $saved_workspace]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
@@ -71,19 +84,13 @@ $PAGE->set_context($modulecontext);
 
 echo $OUTPUT->header();
 
-$cmid = $PAGE->cm->id;
-$cm = get_coursemodule_from_id('nextblocks', $cmid, 0, false, MUST_EXIST);
-$instanceid = $cm->instance;
-
 $title = $DB->get_field('nextblocks', 'name', array('id' => $instanceid));
 $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid));
 
 echo $OUTPUT->heading($title);
 echo '<p>' . $description . '</p>';
 
-//make horizontal separator
 echo '<hr>';
-
 
 echo '<div class="container mt-6 mb-6 h-50">
     <div class="row h-100">
@@ -99,10 +106,30 @@ echo '<div class="container mt-6 mb-6 h-50">
 //make div for displaying static code text
 echo '<div id="codeDiv" class="container mt-6 mb-6"></div>';
 
+//display tests file
+if($filenamehash != false){
+    echo '<div id="testsDiv" class="container mt-6 mb-6">';
+    echo '<h3>Tests</h3>';
+    echo '<p>' . $contents . '</p>';
+    echo '</div>';
+}
+
+//display test results
+if($filenamehash != false){
+    echo '<div id="testResultsDiv" class="container mt-6 mb-6">';
+    echo '<h3>Test Results</h3>';
+    echo '<p id="testResults"></p>';
+    echo '</div>';
+}
+
+//display code output
+echo '<div id="outputDiv" class="container mt-6 mb-6">Program output: <br></div>';
+
 //make buttons centered
 echo '<div style="text-align: center;">';
 
 echo '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
+echo '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />';
 echo '<input id="saveButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_save", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';

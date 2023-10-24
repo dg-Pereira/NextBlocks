@@ -9,7 +9,8 @@
 
 /* globals javascript */
 
-import {replaceCode} from "./lib";
+import {getWorkspaceCode, replaceCode, runTests} from "./lib";
+import {saveWorkspace} from "./repository";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -152,24 +153,184 @@ const options = {
     },
 };
 
-let workspace;
+// getMainWorkspace might remove need for global variable
+let nextblocksWorkspace;
 
-export const init = () => {
-    workspace = Blockly.inject('blocklyDiv', options);
+/**
+ * @param {String} contents The contents of the tests file
+ * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
+ */
+export const init = (contents, loadedSave) => {
+    nextblocksWorkspace = Blockly.inject('blocklyDiv', options);
 
+    //parse json from contents
+    const tests = JSON.parse(contents);
+
+    if (tests !== null) {
+        // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
+        // was a workspace to load, they would be added twice.
+        const inputs = tests[0].inputs;
+        inputs.forEach((input, i) => {
+            const inputName = Object.keys(input)[0];
+            createForcedInputBlock(inputName); // Doesn't add block to workspace, just defines it. Needed for save loading
+
+            if (loadedSave === null) { // Only add to workspace if there is no workspace to load
+                const blockName = "forced_input_" + inputName;
+                let newBlock = addBlockToWorkspace(blockName, nextblocksWorkspace);
+                newBlock.moveBy(0, i * 50); // Move block down a bit so that they don't overlap
+            }
+        });
+    }
+
+    // Load the save, if there is one
+    if (loadedSave !== null) {
+        loadSave(loadedSave, nextblocksWorkspace);
+    }
+
+    setupButtons(tests, contents, nextblocksWorkspace);
+};
+
+/**
+ * @param {String} blockName The name of the input block to be added (prompt on the left side of the block
+ * @param {WorkspaceSvg} workspace The workspace to add the input block to
+ * @returns {BlockSvg} The newly created block
+ */
+function addBlockToWorkspace(blockName, workspace) {
+    const newBlock = workspace.newBlock(blockName);
+    newBlock.initSvg();
+    newBlock.render();
+    return newBlock;
+}
+
+/**
+ * @param {String} loadedSave
+ * @param {WorkspaceSvg} workspace
+ */
+function loadSave(loadedSave, workspace) {
+    const state = JSON.parse(atob(loadedSave));
+    Blockly.serialization.workspaces.load(state, workspace);
+}
+
+/**
+ * @param {{}} tests
+ * @param {String} contents
+ * @param {WorkspaceSvg} workspace
+ */
+function setupButtons(tests, contents, workspace) {
+    // Listen for clicks on the run button
     const runButton = document.getElementById('runButton');
-    runButton.addEventListener('click', runCode);
+    runButton.addEventListener('click', function() {
+        const code = getWorkspaceCode(workspace);
+        runCode(code);
+    });
+
+    // Listen for clicks on the run tests button
+    if (contents !== '') {
+        const runTestsButton = document.getElementById('runTestsButton');
+        runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
+            const results = runTests(workspace, tests);
+            displayTestResults(results);
+        });
+    }
+
+    // Listen for clicks on the save button
+    const saveButton = document.getElementById('saveButton');
+    saveButton.addEventListener('click', saveState);
+}
+
+/**
+ * Saves the current state of the workspace to the database, for later retrieval and display
+ */
+export const saveState = async() => {
+    const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
+    const stateB64 = btoa(JSON.stringify(state));
+    const cmid = getCMID();
+    await saveWorkspace(cmid, stateB64);
 };
 
 /**
  *
  */
-function runCode() {
-    const code = javascript.javascriptGenerator.workspaceToCode(workspace);
+function getCMID() {
+    const classList = document.body.classList;
+    const cmidClass = Array.from(classList).find((className) => className.startsWith('cmid-'));
+    return parseInt(cmidClass.split('-')[1]);
+}
+
+/**
+ * @param {String} prompt
+ */
+function createForcedInputBlock(prompt){
+    const blockName = "forced_input_" + prompt;
+    Blockly.Blocks[blockName] = {
+        init: function() {
+            this.appendDummyInput()
+                .appendField(prompt)
+                .appendField(new Blockly.FieldTextInput('text'), prompt);
+            this.setOutput(true, "String");
+            this.setDeletable(false);
+            this.setColour(180);
+            this.setTooltip("");
+            this.setHelpUrl("");
+        }
+    };
+
+    // eslint-disable-next-line no-unused-vars
+    javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
+        const text = block.getFieldValue(prompt);
+        let code = '(function () { let ' + prompt + ' = "' + text + '"; return ' + prompt + ';})()';
+        return [code, Blockly.JavaScript.ORDER_NONE];
+    };
+}
+
+/**
+ * @param {Boolean[]} results
+ */
+function displayTestResults(results) {
+    const testResultsDiv = document.getElementById('testResultsDiv');
+    testResultsDiv.innerHTML = '';
+    results.forEach((result, i) => {
+        const testResult = document.createElement('p');
+        testResult.innerHTML = 'Test ' + (i + 1) + ': ' + (result ? 'Passed' : 'Failed');
+        testResultsDiv.appendChild(testResult);
+    });
+}
+
+/**
+ * @param {String} code The Javascript code to be run
+ * @returns {any} The output of the code
+ * Runs the code and returns the output, does not display it
+ */
+function silentRunCode(code) {
     replaceCode(code);
     // eslint-disable-next-line no-eval
-    eval(code);
+    return eval(code);
 }
+
+/**
+ * @param {String} code The Javascript code to be run
+ * Runs the code and displays the output in the output div
+ */
+function runCode(code) {
+    const output = silentRunCode(code);
+
+    const outputDiv = document.getElementById('outputDiv');
+    outputDiv.innerHTML += output;
+}
+
+// eslint-disable-next-line no-unused-vars
+// Redefine the text_print block to use the outputString variable instead of alert.
+javascript.javascriptGenerator.forBlock.text_print = function(block, generator) {
+    return (
+        "outputString += " +
+        (generator.valueToCode(
+            block,
+            "TEXT",
+            Blockly.JavaScript.ORDER_NONE
+        ) || "''") +
+        ";\n"
+    );
+};
 
 Blockly.Blocks.text_input = {
     init: function() {
@@ -221,7 +382,7 @@ class CustomCategory extends Blockly.ToolboxCategory {
     }
 
     /** @override */
-    addColourBorder_(colour){
+    addColourBorder_(colour) {
         this.rowDiv_.style.backgroundColor = colour;
     }
 
@@ -270,12 +431,6 @@ class ToolboxLabel extends Blockly.ToolboxItem {
     }
 }
 
-Blockly.registry.register(
-    Blockly.registry.Type.TOOLBOX_ITEM,
-    'toolboxlabel',
-    ToolboxLabel);
+Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, 'toolboxlabel', ToolboxLabel);
 
-Blockly.registry.register(
-    Blockly.registry.Type.TOOLBOX_ITEM,
-    Blockly.ToolboxCategory.registrationName,
-    CustomCategory, true);
+Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCategory.registrationName, CustomCategory, true);

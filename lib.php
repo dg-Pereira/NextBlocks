@@ -57,10 +57,171 @@ function nextblocks_add_instance($moduleinstance, $mform = null) {
 
     $moduleinstance->timecreated = time();
 
-    $id = $DB->insert_record('nextblocks', $moduleinstance);
+    $id = (int)$DB->insert_record('nextblocks', $moduleinstance);
+
+    //post form submission stuff here!
+
+    // Form processing and displaying is done here.
+    if ($mform->is_cancelled()) {
+        // If there is a cancel element on the form, and it was pressed,
+        // then the `is_cancelled()` function will return true.
+        // You can handle the cancel operation here.
+
+    } else if ($fromform = $mform->get_data()) {
+        // When the form is submitted, and the data is successfully validated,
+        // the `get_data()` function will return the data posted in the form.
+
+        //save the tests file in File API
+        save_tests_file($fromform, $id);
+
+        // In-place replace tests file with json file. better to do this here than in the client, because all clients
+        // will have the same tests file, so we don't need to do this for every client.
+        // I don't think it can be done before, in save_tests_file, because we don't have access to the file's contents
+        // until its saved
+        convert_tests_file_to_json($id);
+
+        //save hash of the file in the database for later file retrieval
+        save_tests_file_hash($id);
+
+        //if tests file does not exist, hash is 0 in the database
+    } else {
+        // This branch is executed if the form is submitted but the data doesn't
+        // validate and the form should be redisplayed or on the first display of the form.
+
+        //send log to C:\wamp64\logs\php_error.log
+        // Set anydefault data (if any).
+        //$this->set_data($toform);
+
+        // Display the form.
+        //$mform->display();
+    }
 
     return $id;
 }
+
+function convert_tests_file_to_json(int $id)
+{
+    global $PAGE;
+    $fileinfo = array(
+        'contextid' => $PAGE->context->id,
+        'component' => 'mod_nextblocks',
+        'filearea' => 'attachment',
+        'itemid' => $id,
+        'filepath' => '/',
+        'filename' => 'tests.json'
+    );
+
+    //create get tests file
+    $fs = get_file_storage();
+    $file = $fs->get_file_by_hash(get_filenamehash($id));
+    $fileString = $file->get_content();
+
+    //convert contents of tests file to json
+    $json = parse_tests_file($fileString);
+    $new_file = $fs->create_file_from_string($fileinfo, json_encode($json));
+
+    //in-place replace tests file with json file
+    $file->replace_file_with($new_file);
+
+    // $file->replace_content_with($fileString); is deprecated :(
+    $new_file->delete();
+}
+
+function save_tests_file_hash(int $id)
+{
+    global $DB;
+    $pathnamehash = $DB->get_field('files', 'pathnamehash', ['component' => 'mod_nextblocks', 'filearea' => 'attachment', 'itemid' => $id]);
+    //if file exists, i.e., a tests file was uploaded, save the hash of the file in the database, else it stays null
+    if($pathnamehash != false){
+        $DB->set_field('nextblocks', 'testsfilehash', $pathnamehash, ['id' => $id]);
+    }
+}
+
+/**
+ * @param int $id The id of the instance.
+ * @return false|mixed The pathnamehash of the file or false if it does not exist.
+ * @throws dml_exception
+ */
+function get_filenamehash(int $id)
+{
+    global $DB;
+    $pathnamehash = $DB->get_field('files', 'pathnamehash', ['component' => 'mod_nextblocks', 'filearea' => 'attachment', 'itemid' => $id]);
+    return $pathnamehash;
+}
+
+function save_tests_file(object $fromform, int $id)
+{
+    // Save the tests file with File API.
+    // Will need a check for whether the exercise creator selected the file option or not.
+    global $PAGE;
+    file_save_draft_area_files(
+        // The $fromform->attachments property contains the itemid of the draft file area.
+        $fromform->attachments,
+
+        // The combination of contextid / component / filearea / itemid
+        // form the virtual bucket that file are stored in.
+        $PAGE->context->id,
+        'mod_nextblocks',
+        'attachment',
+        $id,
+        [
+            'subdirs' => 0,
+            'maxfiles' => 1,
+        ]
+    );
+}
+
+// Maybe in the future write regular expression to validate the tests file
+// Consider doing parsing on the server side, when the file is submitted
+// TODO a more formal file format description
+/**
+ * @param String $fileString The contents of the tests file
+ * @return array [{}] An array of test cases, each test case containing a list of inputs and an output, in JSON format
+ * @throws Exception If the file is not in the correct format
+ */
+function parse_tests_file($fileString) {
+    try {
+        // The returned object has a list of test cases
+        $jsonReturn = [];
+
+        // Different test cases are separated by |
+        $testCases = explode("|", $fileString);
+
+        foreach ($testCases as $testCase) {
+            // Each test case contains a list of inputs (and an output)
+            $thisTestCaseJson = [];
+            $thisTestCaseJson['inputs'] = [];
+
+            // The input and output of the test are separated by -
+            $inputOutput = explode("-", $testCase);
+            $inputs = $inputOutput[0];
+            $thisTestCaseJson['output'] = trim($inputOutput[1]); // Remove newlines and add output of test to JSON
+
+            $inputLines = explode("_", $inputs);
+
+            foreach ($inputLines as $input) {
+                if (strlen($input) < 3) { // Skip junk elements
+                    continue;
+                }
+                // Each input has multiple lines. The first line is the input name, the prompt, and the rest are
+                // the input values for that input
+                $inputLines = array_map('trim', explode("\n", $input)); // Remove junk line breaks from every line
+                array_shift($inputLines); // Remove the first line (junk)
+                array_pop($inputLines); // Remove the last line (junk)
+
+                // Contains the input prompt and a list of input values
+                $thisInputJson = [$inputLines[0] => array_slice($inputLines, 1)];
+                $thisTestCaseJson['inputs'][] = $thisInputJson; // Add this input to the list of inputs of this test case
+            }
+
+            $jsonReturn[] = $thisTestCaseJson; // Add this test case to the list of test cases
+        }
+        return $jsonReturn;
+    } catch (Exception $e) {
+        throw new Exception("Error parsing tests file: " . $e->getMessage());
+    }
+}
+
 
 /**
  * Updates an instance of the mod_nextblocks in the database.
@@ -102,7 +263,7 @@ function nextblocks_delete_instance($id) {
     return true;
 }
 
-function console_log($output, $with_script_tags = true) {
+function nextblocks_console_log($output, $with_script_tags = true) {
     $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) .
         ');';
     if ($with_script_tags) {
