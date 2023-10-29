@@ -153,7 +153,7 @@ const options = {
     },
 };
 
-// getMainWorkspace might remove need for global variable
+// GetMainWorkspace might remove need for global variable
 let nextblocksWorkspace;
 
 /**
@@ -161,9 +161,15 @@ let nextblocksWorkspace;
  * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
  */
 export const init = (contents, loadedSave) => {
-    nextblocksWorkspace = Blockly.inject('blocklyDiv', options);
+    const blocklyDiv = document.getElementById('blocklyDiv');
+    const blocklyArea = document.getElementById('blocklyArea');
+    nextblocksWorkspace = Blockly.inject(blocklyDiv, options);
 
-    //parse json from contents
+    // Use resize observer instead of window resize event. This captures both window resize and element resize
+    const resizeObserver = new ResizeObserver(() => onResize(blocklyArea, blocklyDiv, nextblocksWorkspace));
+    resizeObserver.observe(blocklyArea);
+
+    // Parse json from contents
     const tests = JSON.parse(contents);
 
     if (tests !== null) {
@@ -188,6 +194,24 @@ export const init = (contents, loadedSave) => {
     }
 
     setupButtons(tests, contents, nextblocksWorkspace);
+};
+
+const onResize = function(blocklyArea, blocklyDiv, nextblocksWorkspace) {
+    // Compute the absolute coordinates and dimensions of blocklyArea.
+    let element = blocklyArea;
+    let x = 0;
+    let y = 0;
+    do {
+        x += element.offsetLeft;
+        y += element.offsetTop;
+        element = element.offsetParent;
+    } while (element);
+    // Position blocklyDiv over blocklyArea.
+    blocklyDiv.style.left = x + 'px';
+    blocklyDiv.style.top = y + 'px';
+    blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+    blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+    Blockly.svgResize(nextblocksWorkspace);
 };
 
 /**
@@ -260,7 +284,7 @@ function getCMID() {
 /**
  * @param {String} prompt
  */
-function createForcedInputBlock(prompt){
+function createForcedInputBlock(prompt) {
     const blockName = "forced_input_" + prompt;
     Blockly.Blocks[blockName] = {
         init: function() {

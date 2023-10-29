@@ -92,13 +92,57 @@ echo '<p>' . $description . '</p>';
 
 echo '<hr>';
 
-echo '<div class="container mt-6 mb-6 h-50">
+echo '<div class="container-fluid mt-6 mb-6 h-50">
     <div class="row h-100">
-        <div class="col-md-10 h-100">
-            <div id="blocklyDiv" class="col-md-12 h-100"></div>
+        <div id = "blocklyArea" class="col-md-9 h-100">
+            <div id="blocklyDiv" class="mw-100 h-100"></div>
         </div>
-        <div class="col-md-2">
-                <img src="pix/opinion.png" alt="Dummy opinion image">
+        <div class="col-md-3 h-100">
+            <div class="row h-25 border">
+                <!-- "reactions" on top, and a row of three buttons below" -->
+                <div class="col-md-12 h-100">
+                    <div class="row h-25">
+                        <!-- centered text "reactions" -->
+                        <div class="col-md-12 text-center">
+                            '. $OUTPUT->heading("Reactions", $level=4) . '
+                        </div>
+                    </div>
+                    <div class="row h-75">
+                        <!-- three emoji reactions -->
+                        <div class="col-md-4 h-100">
+                            <div class="row h-75">
+                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded bg-primary mh-100" src="pix/emoji-hard.png" alt="Dummy laugh image">
+                            </div>
+                            <div class="row h-25">
+                                <div class="col-md-12 text-center">
+                                    33%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 h-100">
+                            <div class="row h-75">
+                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded mh-100" src="pix/emoji-think.png" alt="Dummy laugh image">
+                            </div>
+                            <div class="col-md-12 text-center">
+                                33%
+                            </div>
+                        </div>
+                        <div class="col-md-4 h-100">
+                            <div class="row h-75">
+                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded mh-100" src="pix/emoji-easy.png" alt="Dummy laugh image">
+                            </div>
+                            <div class="col-md-12 text-center">
+                                33%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row h-75 border">
+                <div class="col-md-12 text-center">
+                    '. $OUTPUT->heading("Output | Tests", $level=4) . '
+                </div>
+            </div>
         </div>
     </div>
 </div>';
