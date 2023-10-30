@@ -139,8 +139,28 @@ echo '<div class="container-fluid mt-6 mb-6 h-50">
                 </div>
             </div>
             <div class="row h-75 border">
-                <div class="col-md-12 text-center">
-                    '. $OUTPUT->heading("Output | Tests", $level=4) . '
+                <div class="col-md-12 text-center d-flex flex-column h-100">
+                    <div class="row">
+                        '. $OUTPUT->heading("Output", $level=4) . '
+                    </div>
+                    <div class="row">
+                        <div id="output-div" class="col-md-12">
+                            
+                        </div>
+                    </div>
+                    <div class="row mt-auto">
+                        <!-- run and run tests buttons -->
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />
+                                </div>
+                                <div class="col-md-6">
+                                    <input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

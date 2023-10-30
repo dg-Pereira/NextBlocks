@@ -311,7 +311,7 @@ function createForcedInputBlock(prompt) {
  * @param {Boolean[]} results
  */
 function displayTestResults(results) {
-    const testResultsDiv = document.getElementById('testResultsDiv');
+    const testResultsDiv = document.getElementById('output-div');
     testResultsDiv.innerHTML = '';
     results.forEach((result, i) => {
         const testResult = document.createElement('p');
@@ -338,8 +338,8 @@ function silentRunCode(code) {
 function runCode(code) {
     const output = silentRunCode(code);
 
-    const outputDiv = document.getElementById('outputDiv');
-    outputDiv.innerHTML += output;
+    const outputDiv = document.getElementById('output-div');
+    outputDiv.innerHTML = output;
 }
 
 // eslint-disable-next-line no-unused-vars
