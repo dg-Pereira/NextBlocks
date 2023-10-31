@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {getWorkspaceCode, replaceCode, runTests} from "./lib";
+import {getWorkspaceCode, replaceCode, runTests, testsAccordion} from "./lib";
 import {saveWorkspace} from "./repository";
 
 const toolbox = {
@@ -253,7 +253,7 @@ function setupButtons(tests, contents, workspace) {
         const runTestsButton = document.getElementById('runTestsButton');
         runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
             const results = runTests(workspace, tests);
-            displayTestResults(results);
+            displayTestResults(results, tests);
         });
     }
 
@@ -308,16 +308,12 @@ function createForcedInputBlock(prompt) {
 }
 
 /**
- * @param {Boolean[]} results
+ * @param {any[]} results
+ * @param {{}} tests
  */
-function displayTestResults(results) {
+function displayTestResults(results, tests) {
     const testResultsDiv = document.getElementById('output-div');
-    testResultsDiv.innerHTML = '';
-    results.forEach((result, i) => {
-        const testResult = document.createElement('p');
-        testResult.innerHTML = 'Test ' + (i + 1) + ': ' + (result ? 'Passed' : 'Failed');
-        testResultsDiv.appendChild(testResult);
-    });
+    testResultsDiv.innerHTML = testsAccordion(results, tests);
 }
 
 /**
