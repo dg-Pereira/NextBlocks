@@ -168,29 +168,18 @@ echo '<div class="container-fluid fixed-height-container mt-6 mb-6 h-50">
 echo '<div id="codeDiv" class="container mt-6 mb-6"></div>';
 
 //display tests file
+/*
 if($filenamehash != false){
     echo '<div id="testsDiv" class="container mt-6 mb-6">';
     echo '<h3>Tests</h3>';
     echo '<p>' . $tests_file_contents . '</p>';
     echo '</div>';
 }
-
-//display test results
-if($filenamehash != false){
-    echo '<div id="testResultsDiv" class="container mt-6 mb-6">';
-    echo '<h3>Test Results</h3>';
-    echo '<p id="testResults"></p>';
-    echo '</div>';
-}
-
-//display code output
-echo '<div id="outputDiv" class="container mt-6 mb-6">Program output: <br></div>';
+*/
 
 //make buttons centered
 echo '<div style="text-align: center;">';
 
-echo '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
-echo '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />';
 echo '<input id="saveButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_save", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';
