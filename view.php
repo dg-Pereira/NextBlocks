@@ -92,7 +92,7 @@ echo '<p>' . $description . '</p>';
 
 echo '<hr>';
 
-echo '<div class="container-fluid fixed-height-container mt-6 mb-6 h-50">
+echo '<div id="nextblocks-container" class="container-fluid mt-6 mb-6">
     <div class="row h-100">
         <div id = "blocklyArea" class="col-md-9 h-100">
             <div id="blocklyDiv" class="mw-100 h-100"></div>
@@ -139,15 +139,17 @@ echo '<div class="container-fluid fixed-height-container mt-6 mb-6 h-50">
                 </div>
             </div>
             <div class="row h-75 border">
-                <div class="col-md-12 d-flex flex-column h-100">
-                    <div class="row text-center">
-                        '. $OUTPUT->heading("Output", $level=4) . '
+                <div class="col-md-12 h-100">
+                    <div class="row h-10">
+                        <div class="col-md-12 text-center">
+                            '. $OUTPUT->heading("Output", $level=4) . '
+                        </div>
                     </div>
-                    <div class="row">
-                        <div id="output-div" class="col-md-12 p-2 scrollable-column">
+                    <div class="row h-75">
+                        <div id="output-div" class="col-md-12 h-100 p-2">
                         </div>
                     </div>  
-                    <div class="row mt-auto">
+                    <div class="row h-15">
                         <!-- run and run tests buttons -->
                         <div class="col-md-12">
                             <div class="row">

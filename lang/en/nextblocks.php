@@ -58,3 +58,4 @@ $string['iseval'] = "Exercise is graded?";
 $string['iseval_help'] = "Check if the exercise is for graded.";
 $string['nextblocks_tab_view'] = "Test";
 $string['nextblocks_tab_edit'] = "Test";
+$string['pluginadministration'] = 'NextBlocks Administration';

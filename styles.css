@@ -38,3 +38,15 @@
 img {
     pointer-events: none;
 }
+
+#nextblocks-container {
+    height: 70vh;
+}
+
+.h-10 {
+    height: 10%;
+}
+
+.h-15 {
+    height: 15%;
+}

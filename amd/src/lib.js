@@ -106,7 +106,7 @@ export const getWorkspaceCode = (workspace) => {
 export const testsAccordion = (results, testsJSON) => {
     const testCaseCount = testsJSON.length;
 
-    let accordion = '';
+    let accordion = '<div style="max-height: 100%; overflow-y: auto;">';
 
     for (let i = 0; i < testCaseCount; i++) {
         accordion += '<details class="card">';
@@ -136,5 +136,6 @@ export const testsAccordion = (results, testsJSON) => {
         accordion += '</details>';
     }
 
+    accordion += '</div>';
     return accordion;
 };
