@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {getWorkspaceCode, replaceCode, runTests, testsAccordion} from "./lib";
+import {getWorkspaceCode, replaceCode, runTests, silentRunCode, testsAccordion} from "./lib";
 import {saveWorkspace} from "./repository";
 
 const toolbox = {
@@ -172,13 +172,16 @@ export const init = (contents, loadedSave) => {
     // Parse json from contents
     const tests = JSON.parse(contents);
 
+    let inputFunctionDeclarations = {funcDecs: ""};
+
     if (tests !== null) {
         // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
         // was a workspace to load, they would be added twice.
         const inputs = tests[0].inputs;
         inputs.forEach((input, i) => {
             const inputName = Object.keys(input)[0];
-            createForcedInputBlock(inputName); // Doesn't add block to workspace, just defines it. Needed for save loading
+            createForcedInputBlock(inputName, inputFunctionDeclarations); // Doesn't add block to workspace, just
+                                                                          // defines it. Needed for save loading
 
             if (loadedSave === null) { // Only add to workspace if there is no workspace to load
                 const blockName = "forced_input_" + inputName;
@@ -193,7 +196,7 @@ export const init = (contents, loadedSave) => {
         loadSave(loadedSave, nextblocksWorkspace);
     }
 
-    setupButtons(tests, contents, nextblocksWorkspace);
+    setupButtons(tests, contents, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
 };
 
 const onResize = function(blocklyArea, blocklyDiv, nextblocksWorkspace) {
@@ -237,14 +240,18 @@ function loadSave(loadedSave, workspace) {
 
 /**
  * @param {{}} tests
- * @param {String} contents
+ * @param {string} contents
  * @param {WorkspaceSvg} workspace
+ * @param {string} inputFuncDecs
  */
-function setupButtons(tests, contents, workspace) {
+function setupButtons(tests, contents, workspace, inputFuncDecs) {
     // Listen for clicks on the run button
     const runButton = document.getElementById('runButton');
     runButton.addEventListener('click', function() {
-        let code = getWorkspaceCode(workspace);
+        const code = getWorkspaceCode(workspace, inputFuncDecs);
+        // Each function has 3 lines, so we divide by 3 to get the number of functions
+        const inputFuncDecsN = inputFuncDecs.split('\n').length / 3;
+        replaceCode(code, inputFuncDecsN);
         runCode(code);
     });
 
@@ -252,7 +259,7 @@ function setupButtons(tests, contents, workspace) {
     if (contents !== '') {
         const runTestsButton = document.getElementById('runTestsButton');
         runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
-            const results = runTests(workspace, tests);
+            const results = runTests(workspace, tests, inputFuncDecs);
             displayTestResults(results, tests);
         });
     }
@@ -282,9 +289,11 @@ function getCMID() {
 }
 
 /**
- * @param {String} prompt
+ * @param {string} prompt The name of the input block to be added (prompt on the left side of the block)
+ * @param {object} inputFunctionDeclarations Contains the string containing the function declarations for the input
+ * blocks, to be added to the top of the code. Is an object so that it is passed by reference.
  */
-function createForcedInputBlock(prompt) {
+function createForcedInputBlock(prompt, inputFunctionDeclarations) {
     const blockName = "forced_input_" + prompt;
     Blockly.Blocks[blockName] = {
         init: function() {
@@ -299,11 +308,14 @@ function createForcedInputBlock(prompt) {
         }
     };
 
+    inputFunctionDeclarations.funcDecs += `function input${prompt}(string) {\n   return string;\n}\n`;
+    javascript.javascriptGenerator.addReservedWords(`input${prompt}`);
+
     // eslint-disable-next-line no-unused-vars
     javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
         const text = block.getFieldValue(prompt);
-        let code = '(function () { let ' + prompt + ' = "' + text + '"; return ' + prompt + ';})()';
-        return [code, Blockly.JavaScript.ORDER_NONE];
+        let blockCode = `input${prompt}(${text})`;
+        return [blockCode, Blockly.JavaScript.ORDER_NONE];
     };
 }
 
@@ -318,24 +330,16 @@ function displayTestResults(results, tests) {
 
 /**
  * @param {String} code The Javascript code to be run
- * @returns {any} The output of the code
- * Runs the code and returns the output, does not display it
- * TODO: do something other than use eval
- */
-function silentRunCode(code) {
-    // eslint-disable-next-line no-eval
-    return eval(code);
-}
-
-/**
- * @param {String} code The Javascript code to be run
  * Runs the code and displays the output in the output div
  */
 function runCode(code) {
     const output = silentRunCode(code);
-    replaceCode(code);
+    // Replace newlines with <br /> so that they are displayed correctly
+    const outputHTML = output.replace(/\n/g, "<br />");
     const outputDiv = document.getElementById('output-div');
-    outputDiv.innerHTML = output;
+
+    // Wrap the output in a div with max-height and overflow-y: auto to make it scrollable if too long (multiline input)
+    outputDiv.innerHTML = `<div style="max-height: 100%; overflow-y: auto;"><pre>${outputHTML}</pre></div>`;
 }
 
 // eslint-disable-next-line no-extend-native
@@ -345,27 +349,17 @@ String.prototype.hideWrapperFunction = function() {
     return lines.join('\n');
 };
 
-// eslint-disable-next-line no-extend-native
-String.prototype.swapCase = function() {
-    var newString = '';
-    for (var i = 0; i < this.length; i++) {
-        var c = this[i];
-        newString += c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
-    }
-    return newString;
-};
-
 // eslint-disable-next-line no-unused-vars
 // Redefine the text_print block to use the outputString variable instead of alert.
 javascript.javascriptGenerator.forBlock.text_print = function(block, generator) {
     return (
-        "outputString += " +
+        "print(" +
         (generator.valueToCode(
             block,
             "TEXT",
             Blockly.JavaScript.ORDER_NONE
         ) || "''") +
-        ";\n"
+        ");\n"
     );
 };
 
@@ -398,14 +392,14 @@ Blockly.Blocks.text_multiline_input = {
 // eslint-disable-next-line no-unused-vars
 javascript.javascriptGenerator.forBlock.text_input = function(block, generator) {
     const text = block.getFieldValue('text_input');
-    let code = '"' + text + '"';
+    let code = 'input("' + text + '")';
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 // eslint-disable-next-line no-unused-vars
 javascript.javascriptGenerator.forBlock.text_multiline_input = function(block, generator) {
     const text = block.getFieldValue('text_input');
-    let code = "`" + text + "`";
+    let code = "input(`" + text + "`)";
     return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
