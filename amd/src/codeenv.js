@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {getWorkspaceCode, replaceCode, runTests} from "./lib";
+import {getWorkspaceCode, replaceCode, runTests, testsAccordion} from "./lib";
 import {saveWorkspace} from "./repository";
 
 const toolbox = {
@@ -153,7 +153,7 @@ const options = {
     },
 };
 
-// getMainWorkspace might remove need for global variable
+// GetMainWorkspace might remove need for global variable
 let nextblocksWorkspace;
 
 /**
@@ -161,9 +161,15 @@ let nextblocksWorkspace;
  * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
  */
 export const init = (contents, loadedSave) => {
-    nextblocksWorkspace = Blockly.inject('blocklyDiv', options);
+    const blocklyDiv = document.getElementById('blocklyDiv');
+    const blocklyArea = document.getElementById('blocklyArea');
+    nextblocksWorkspace = Blockly.inject(blocklyDiv, options);
 
-    //parse json from contents
+    // Use resize observer instead of window resize event. This captures both window resize and element resize
+    const resizeObserver = new ResizeObserver(() => onResize(blocklyArea, blocklyDiv, nextblocksWorkspace));
+    resizeObserver.observe(blocklyArea);
+
+    // Parse json from contents
     const tests = JSON.parse(contents);
 
     if (tests !== null) {
@@ -188,6 +194,24 @@ export const init = (contents, loadedSave) => {
     }
 
     setupButtons(tests, contents, nextblocksWorkspace);
+};
+
+const onResize = function(blocklyArea, blocklyDiv, nextblocksWorkspace) {
+    // Compute the absolute coordinates and dimensions of blocklyArea.
+    let element = blocklyArea;
+    let x = 0;
+    let y = 0;
+    do {
+        x += element.offsetLeft;
+        y += element.offsetTop;
+        element = element.offsetParent;
+    } while (element);
+    // Position blocklyDiv over blocklyArea.
+    blocklyDiv.style.left = x + 'px';
+    blocklyDiv.style.top = y + 'px';
+    blocklyDiv.style.width = blocklyArea.offsetWidth + 'px';
+    blocklyDiv.style.height = blocklyArea.offsetHeight + 'px';
+    Blockly.svgResize(nextblocksWorkspace);
 };
 
 /**
@@ -229,7 +253,7 @@ function setupButtons(tests, contents, workspace) {
         const runTestsButton = document.getElementById('runTestsButton');
         runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
             const results = runTests(workspace, tests);
-            displayTestResults(results);
+            displayTestResults(results, tests);
         });
     }
 
@@ -260,7 +284,7 @@ function getCMID() {
 /**
  * @param {String} prompt
  */
-function createForcedInputBlock(prompt){
+function createForcedInputBlock(prompt) {
     const blockName = "forced_input_" + prompt;
     Blockly.Blocks[blockName] = {
         init: function() {
@@ -284,16 +308,12 @@ function createForcedInputBlock(prompt){
 }
 
 /**
- * @param {Boolean[]} results
+ * @param {any[]} results
+ * @param {{}} tests
  */
-function displayTestResults(results) {
-    const testResultsDiv = document.getElementById('testResultsDiv');
-    testResultsDiv.innerHTML = '';
-    results.forEach((result, i) => {
-        const testResult = document.createElement('p');
-        testResult.innerHTML = 'Test ' + (i + 1) + ': ' + (result ? 'Passed' : 'Failed');
-        testResultsDiv.appendChild(testResult);
-    });
+function displayTestResults(results, tests) {
+    const testResultsDiv = document.getElementById('output-div');
+    testResultsDiv.innerHTML = testsAccordion(results, tests);
 }
 
 /**
@@ -314,8 +334,8 @@ function silentRunCode(code) {
 function runCode(code) {
     const output = silentRunCode(code);
 
-    const outputDiv = document.getElementById('outputDiv');
-    outputDiv.innerHTML += output;
+    const outputDiv = document.getElementById('output-div');
+    outputDiv.innerHTML = output;
 }
 
 // eslint-disable-next-line no-unused-vars

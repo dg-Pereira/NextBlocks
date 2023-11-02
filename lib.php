@@ -182,7 +182,8 @@ function save_tests_file(object $fromform, int $id)
  * @return array [{}] An array of test cases, each test case containing a list of inputs and an output, in JSON format
  * @throws Exception If the file is not in the correct format
  */
-function parse_tests_file($fileString) {
+function parse_tests_file($fileString): array
+{
     try {
         // The returned object has a list of test cases
         $jsonReturn = [];

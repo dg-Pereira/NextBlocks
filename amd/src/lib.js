@@ -49,60 +49,12 @@ const formatCodeHTML = (code) => {
     return "<pre>" + code + "</pre>";
 };
 
-// Maybe in the future write regular expression to validate the tests file
-// Consider doing parsing on the server side, when the file is submitted
-// TODO a more formal file format description
-/**
- * Parses the tests file and returns a json object with the tests data
- * @param {String} fileString the string containing the contents of the tests file
- * @returns {{}} A JSON object with the tests data
- */
-// eslint-disable-next-line no-unused-vars
-export const parseTestsFile = (fileString) => {
-    try {
-        // The returned object has a list of test cases
-        let jsonReturn = [];
-
-        // Different test cases are separated by |
-        let testCases = fileString.split("|");
-
-        testCases.forEach((testCase) => {
-            // Each test case contains a list of inputs (and an output)
-            let thisTestCaseJson = {};
-            thisTestCaseJson.inputs = [];
-
-            // The input and output of the test are separated by -
-            let inputOutput = testCase.split("-");
-            let inputs = inputOutput[0];
-            thisTestCaseJson.output = inputOutput[1].trim(); // Remove newlines and add output of test to JSON
-
-            inputs.split("_").forEach((input) => {
-                if (input.length < 3) { // Skip junk elements
-                    return;
-                }
-                // Each input has multiple lines. The first line is the input name, the prompt, and the rest are
-                // the input values for that input
-                let inputLines = input.split(/\n/).map((line) => line.trim()); // Remove junk line breaks from every line
-                inputLines = inputLines.slice(1, inputLines.length - 1); // First and last lines are junk
-                // Contains the input prompt and a list of input values
-                let thisInputJson = {};
-                thisInputJson[inputLines[0]] = inputLines.slice(1);
-                thisTestCaseJson.inputs.push(thisInputJson); // Add this input to the list of inputs of this test case
-            });
-            jsonReturn.push(thisTestCaseJson); // Add this test case to the list of test cases
-        });
-        return jsonReturn;
-    } catch (e) {
-        throw new Error("Error parsing tests file: " + e);
-    }
-};
-
 /**
  * Runs the tests on the given workspace and returns an array of booleans, one for each test, indicating whether
  * the test passed or not
  * @param {WorkspaceSvg} workspace the workspace to run the tests on
  * @param {{}} tests the tests to run
- * @returns {Boolean[]} an array of booleans, one for each test, indicating whether the test passed or not
+ * @returns {any[]} an array of booleans, one for each test, indicating whether the test passed or not
  */
 export const runTests = (workspace, tests) => {
     // eslint-disable-next-line no-unused-vars
@@ -127,11 +79,9 @@ export const runTests = (workspace, tests) => {
             thisTestCode = preStr + values[0] + postStr;
 
         });
-        // eslint-disable-next-line no-unused-vars
-        const testOutput = test.output;
         // eslint-disable-next-line no-eval
         const codeOutput = eval(thisTestCode);
-        results.push(testOutput === codeOutput);
+        results.push(codeOutput);
     });
     return results;
 };
@@ -151,4 +101,41 @@ export const getWorkspaceCode = (workspace) => {
     // Add a preamble and a postscript to the code.
     code = preamble + code + postscript;
     return code;
+};
+
+export const testsAccordion = (results, testsJSON) => {
+    const testCaseCount = testsJSON.length;
+
+    let accordion = '<div style="max-height: 100%; overflow-y: auto;">';
+
+    for (let i = 0; i < testCaseCount; i++) {
+        accordion += '<details class="card">';
+        accordion += '<summary class="card-header">';
+        accordion += 'Test ' + (i + 1);
+        // Show if test passed or failed
+        if (results[i] === testsJSON[i]['output']) {
+            accordion += '<span class="badge badge-success float-right">Passed</span>';
+        } else {
+            accordion += '<span class="badge badge-danger float-right">Failed</span>';
+        }
+        accordion += '</summary>';
+        accordion += '<div class="card-body pt-0 pb-0 pl-2 pr-2">';
+        // eslint-disable-next-line no-loop-func
+        testsJSON[i]['inputs'].forEach((input) => {
+            for (const key in input) {
+                accordion += '<p class="pt-2 m-0">' + key + ': </p>';
+                accordion += '<pre class="mt-1 mb-0 test-input">' + input[key][0] + '</pre>';
+            }
+        });
+        accordion += '<p class="pt-2 border-top mt-2 mb-0">Test output: </p>';
+        accordion += '<pre class="mt-1 mb-0 mr-0 ml-0 test-output">' + testsJSON[i]['output'] + '</pre>';
+        accordion += '<div class="p-0">';
+        accordion += '<p class="pt-2 m-0">Your output: </p>';
+        accordion += '<pre class="pb-2 mt-1 mb-0 ml-0 mr-0 test-output">' + results[i] + '</pre>';
+        accordion += '</div>';
+        accordion += '</details>';
+    }
+
+    accordion += '</div>';
+    return accordion;
 };

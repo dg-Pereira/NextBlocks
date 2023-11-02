@@ -73,9 +73,9 @@ $saved_workspace = $record ? $record->saved_workspace : null;
 $fs = get_file_storage();
 $filenamehash = get_filenamehash($instanceid);
 
-$file = $fs->get_file_by_hash($filenamehash);
-$contents = $file ? $file->get_content() : null;
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$contents, $saved_workspace]);
+$tests_file = $fs->get_file_by_hash($filenamehash);
+$tests_file_contents = $tests_file ? $tests_file->get_content() : null;
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
@@ -92,13 +92,76 @@ echo '<p>' . $description . '</p>';
 
 echo '<hr>';
 
-echo '<div class="container mt-6 mb-6 h-50">
+echo '<div id="nextblocks-container" class="container-fluid mt-6 mb-6">
     <div class="row h-100">
-        <div class="col-md-10 h-100">
-            <div id="blocklyDiv" class="col-md-12 h-100"></div>
+        <div id = "blocklyArea" class="col-md-9 h-100">
+            <div id="blocklyDiv" class="mw-100 h-100"></div>
         </div>
-        <div class="col-md-2">
-                <img src="pix/opinion.png" alt="Dummy opinion image">
+        <div class="col-md-3 mh-100 h-100">
+            <div class="row h-25 border">
+                <!-- "reactions" on top, and a row of three buttons below" -->
+                <div class="col-md-12 h-100">
+                    <div class="row h-25">
+                        <!-- centered text "reactions" -->
+                        <div class="col-md-12 text-center">
+                            '. $OUTPUT->heading("Reactions", $level=4) . '
+                        </div>
+                    </div>
+                    <div class="row h-75">
+                        <!-- three emoji reactions -->
+                        <div class="col-md-4 h-100">
+                            <div class="row h-75">
+                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded bg-primary mh-100" src="pix/emoji-hard.png" alt="Dummy laugh image">
+                            </div>
+                            <div class="row h-25">
+                                <div class="col-md-12 text-center">
+                                    33%
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 h-100">
+                            <div class="row h-75">
+                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded mh-100" src="pix/emoji-think.png" alt="Dummy laugh image">
+                            </div>
+                            <div class="col-md-12 text-center">
+                                33%
+                            </div>
+                        </div>
+                        <div class="col-md-4 h-100">
+                            <div class="row h-75">
+                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded mh-100" src="pix/emoji-easy.png" alt="Dummy laugh image">
+                            </div>
+                            <div class="col-md-12 text-center">
+                                33%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row h-75 border">
+                <div class="col-md-12 h-100">
+                    <div class="row h-10">
+                        <div class="col-md-12 text-center">
+                            '. $OUTPUT->heading("Output", $level=4) . '
+                        </div>
+                    </div>
+                    <div class="row h-75">
+                        <div id="output-div" class="col-md-12 h-100 p-2">
+                        </div>
+                    </div>  
+                    <div class="row h-15">
+                        <!-- run and run tests buttons -->
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />
+                                    <input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>';
@@ -107,29 +170,18 @@ echo '<div class="container mt-6 mb-6 h-50">
 echo '<div id="codeDiv" class="container mt-6 mb-6"></div>';
 
 //display tests file
+/*
 if($filenamehash != false){
     echo '<div id="testsDiv" class="container mt-6 mb-6">';
     echo '<h3>Tests</h3>';
-    echo '<p>' . $contents . '</p>';
+    echo '<p>' . $tests_file_contents . '</p>';
     echo '</div>';
 }
-
-//display test results
-if($filenamehash != false){
-    echo '<div id="testResultsDiv" class="container mt-6 mb-6">';
-    echo '<h3>Test Results</h3>';
-    echo '<p id="testResults"></p>';
-    echo '</div>';
-}
-
-//display code output
-echo '<div id="outputDiv" class="container mt-6 mb-6">Program output: <br></div>';
+*/
 
 //make buttons centered
 echo '<div style="text-align: center;">';
 
-echo '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
-echo '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />';
 echo '<input id="saveButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_save", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
 echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';
