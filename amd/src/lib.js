@@ -39,14 +39,28 @@ export const replaceCode = (code) => {
 };
 
 /**
- * Formats the code with correct html structure to be displayed in the code div
+ * Formats the code with correct HTML structure to be displayed in the code div
  * TODO: implement this function
  * @param {String} code the code text to be formatted (string literal)
  * @returns {String} the formatted code
  */
 const formatCodeHTML = (code) => {
+    code = removeWrapperFunction(code);
     // Code is string literal
     return "<pre>" + code + "</pre>";
+};
+
+/**
+ * Removes the wrapper function from the code for presentation purposes
+ * Removes first two and last three lines
+ * @param {String} code the code to be modified
+ * @returns {String} the code without the wrapper function
+ */
+const removeWrapperFunction = (code) => {
+    const lines = code.split('\n');
+    lines.splice(0, 2);
+    lines.splice(-3);
+    return lines.join('\n');
 };
 
 /**
@@ -113,7 +127,7 @@ export const testsAccordion = (results, testsJSON) => {
         accordion += '<summary class="card-header">';
         accordion += 'Test ' + (i + 1);
         // Show if test passed or failed
-        if (results[i] === testsJSON[i]['output']) {
+        if (results[i] === testsJSON[i].output) {
             accordion += '<span class="badge badge-success float-right">Passed</span>';
         } else {
             accordion += '<span class="badge badge-danger float-right">Failed</span>';
@@ -121,14 +135,14 @@ export const testsAccordion = (results, testsJSON) => {
         accordion += '</summary>';
         accordion += '<div class="card-body pt-0 pb-0 pl-2 pr-2">';
         // eslint-disable-next-line no-loop-func
-        testsJSON[i]['inputs'].forEach((input) => {
+        testsJSON[i].inputs.forEach((input) => {
             for (const key in input) {
                 accordion += '<p class="pt-2 m-0">' + key + ': </p>';
                 accordion += '<pre class="mt-1 mb-0 test-input">' + input[key][0] + '</pre>';
             }
         });
         accordion += '<p class="pt-2 border-top mt-2 mb-0">Test output: </p>';
-        accordion += '<pre class="mt-1 mb-0 mr-0 ml-0 test-output">' + testsJSON[i]['output'] + '</pre>';
+        accordion += '<pre class="mt-1 mb-0 mr-0 ml-0 test-output">' + testsJSON[i].output + '</pre>';
         accordion += '<div class="p-0">';
         accordion += '<p class="pt-2 m-0">Your output: </p>';
         accordion += '<pre class="pb-2 mt-1 mb-0 ml-0 mr-0 test-output">' + results[i] + '</pre>';

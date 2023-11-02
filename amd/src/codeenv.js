@@ -244,7 +244,7 @@ function setupButtons(tests, contents, workspace) {
     // Listen for clicks on the run button
     const runButton = document.getElementById('runButton');
     runButton.addEventListener('click', function() {
-        const code = getWorkspaceCode(workspace);
+        let code = getWorkspaceCode(workspace);
         runCode(code);
     });
 
@@ -273,7 +273,7 @@ export const saveState = async() => {
 };
 
 /**
- *
+ * @returns {Number} The course module id of the current page
  */
 function getCMID() {
     const classList = document.body.classList;
@@ -320,9 +320,9 @@ function displayTestResults(results, tests) {
  * @param {String} code The Javascript code to be run
  * @returns {any} The output of the code
  * Runs the code and returns the output, does not display it
+ * TODO: do something other than use eval
  */
 function silentRunCode(code) {
-    replaceCode(code);
     // eslint-disable-next-line no-eval
     return eval(code);
 }
@@ -333,10 +333,27 @@ function silentRunCode(code) {
  */
 function runCode(code) {
     const output = silentRunCode(code);
-
+    replaceCode(code);
     const outputDiv = document.getElementById('output-div');
     outputDiv.innerHTML = output;
 }
+
+// eslint-disable-next-line no-extend-native
+String.prototype.hideWrapperFunction = function() {
+    const lines = this.split('\n');
+    lines.splice(0, 2); // Remove the first two lines
+    return lines.join('\n');
+};
+
+// eslint-disable-next-line no-extend-native
+String.prototype.swapCase = function() {
+    var newString = '';
+    for (var i = 0; i < this.length; i++) {
+        var c = this[i];
+        newString += c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase();
+    }
+    return newString;
+};
 
 // eslint-disable-next-line no-unused-vars
 // Redefine the text_print block to use the outputString variable instead of alert.
