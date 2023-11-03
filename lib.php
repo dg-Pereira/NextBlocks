@@ -85,7 +85,6 @@ function nextblocks_add_instance($moduleinstance, $mform = null) {
 
         //save hash of the file in the database for later file retrieval
         save_tests_file_hash($id);
-
         //if tests file does not exist, hash is 0 in the database
     } else {
         // This branch is executed if the form is submitted but the data doesn't
@@ -100,6 +99,13 @@ function nextblocks_add_instance($moduleinstance, $mform = null) {
     }
 
     return $id;
+}
+
+function file_structure_is_valid(string $file_string)
+{
+    // Validate file structure with regular expression
+    $exp = "/(\|\s+(_\s+\w+\s+(\w+\s+)+)*-\s+(\w+\s+)+)+/";
+    return preg_match_all($exp, $file_string) !== 1;
 }
 
 function convert_tests_file_to_json(int $id)
@@ -157,6 +163,7 @@ function save_tests_file(object $fromform, int $id)
     // Save the tests file with File API.
     // Will need a check for whether the exercise creator selected the file option or not.
     global $PAGE;
+
     file_save_draft_area_files(
         // The $fromform->attachments property contains the itemid of the draft file area.
         $fromform->attachments,
@@ -190,6 +197,9 @@ function parse_tests_file($fileString): array
 
         // Different test cases are separated by |
         $testCases = explode("|", $fileString);
+
+        // File starts with a |, so the first element of the array is empty
+        array_shift($testCases);
 
         foreach ($testCases as $testCase) {
             // Each test case contains a list of inputs (and an output)
