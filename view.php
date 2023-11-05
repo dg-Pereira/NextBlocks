@@ -87,6 +87,10 @@ echo $OUTPUT->header();
 $title = $DB->get_field('nextblocks', 'name', array('id' => $instanceid));
 $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid));
 
+$runButton = '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
+$runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />' : '';
+
+
 echo $OUTPUT->heading($title);
 echo '<p>' . $description . '</p>';
 
@@ -154,8 +158,8 @@ echo '<div id="nextblocks-container" class="container-fluid mt-6 mb-6">
                         <div class="col-md-12">
                             <div class="row">
                                 <div class="col-md-12 text-center">
-                                    <input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />
-                                    <input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />
+                                    <input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />' .
+                                    $runTestsButton . '
                                 </div>
                             </div>
                         </div>

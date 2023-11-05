@@ -74,18 +74,19 @@ function nextblocks_add_instance($moduleinstance, $mform = null) {
         // When the form is submitted, and the data is successfully validated,
         // the `get_data()` function will return the data posted in the form.
 
-        //save the tests file in File API
-        save_tests_file($fromform, $id);
+        if(hasTestsFile($fromform)) {
+            //save the tests file in File API
+            save_tests_file($fromform, $id);
 
-        // In-place replace tests file with json file. better to do this here than in the client, because all clients
-        // will have the same tests file, so we don't need to do this for every client.
-        // I don't think it can be done before, in save_tests_file, because we don't have access to the file's contents
-        // until its saved
-        convert_tests_file_to_json($id);
+            // In-place replace tests file with json file. better to do this here than in the client, because all clients
+            // will have the same tests file, so we don't need to do this for every client.
+            // I don't think it can be done before, in save_tests_file, because we don't have access to the file's contents
+            // until its saved
+            convert_tests_file_to_json($id);
 
-        //save hash of the file in the database for later file retrieval
-        save_tests_file_hash($id);
-        //if tests file does not exist, hash is 0 in the database
+            //save hash of the file in the database for later file retrieval
+            save_tests_file_hash($id);
+        }
     } else {
         // This branch is executed if the form is submitted but the data doesn't
         // validate and the form should be redisplayed or on the first display of the form.
@@ -99,6 +100,12 @@ function nextblocks_add_instance($moduleinstance, $mform = null) {
     }
 
     return $id;
+}
+
+function hasTestsFile(object $fromform): bool
+{
+    $files = file_get_all_files_in_draftarea($fromform->attachments);
+    return count($files) > 0;
 }
 
 function file_structure_is_valid(string $file_string)
@@ -122,7 +129,8 @@ function convert_tests_file_to_json(int $id)
 
     //create get tests file
     $fs = get_file_storage();
-    $file = $fs->get_file_by_hash(get_filenamehash($id));
+    $hash = get_filenamehash($id);
+    $file = $fs->get_file_by_hash($hash);
     $fileString = $file->get_content();
 
     //convert contents of tests file to json
@@ -284,4 +292,8 @@ function nextblocks_console_log($output, $with_script_tags = true) {
         $js_code = '<script>' . $js_code . '</script>';
     }
     echo $js_code;
+}
+
+function nextblocks_log($message) {
+    error_log($message, 3, "C:\wamp64\logs\php_error.log");
 }

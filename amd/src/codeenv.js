@@ -195,8 +195,7 @@ export const init = (contents, loadedSave) => {
     if (loadedSave !== null) {
         loadSave(loadedSave, nextblocksWorkspace);
     }
-
-    setupButtons(tests, contents, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
+    setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
 };
 
 const onResize = function(blocklyArea, blocklyDiv, nextblocksWorkspace) {
@@ -239,12 +238,11 @@ function loadSave(loadedSave, workspace) {
 }
 
 /**
- * @param {{}} tests
- * @param {string} contents
- * @param {WorkspaceSvg} workspace
+ * @param {{}} tests The tests to be run
+ * @param {WorkspaceSvg} workspace The workspace to get the code from
  * @param {string} inputFuncDecs
  */
-function setupButtons(tests, contents, workspace, inputFuncDecs) {
+function setupButtons(tests, workspace, inputFuncDecs) {
     // Listen for clicks on the run button
     const runButton = document.getElementById('runButton');
     runButton.addEventListener('click', function() {
@@ -255,8 +253,8 @@ function setupButtons(tests, contents, workspace, inputFuncDecs) {
         runCode(code);
     });
 
-    // Listen for clicks on the run tests button
-    if (contents !== '') {
+    if (tests !== null) {
+        // Listen for clicks on the run tests button
         const runTestsButton = document.getElementById('runTestsButton');
         runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
             const results = runTests(workspace, tests, inputFuncDecs);
