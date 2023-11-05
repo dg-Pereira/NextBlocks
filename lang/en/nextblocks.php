@@ -59,3 +59,5 @@ $string['iseval_help'] = "Check if the exercise is for graded.";
 $string['nextblocks_tab_view'] = "Test";
 $string['nextblocks_tab_edit'] = "Test";
 $string['pluginadministration'] = 'NextBlocks Administration';
+$string['invalidfilestructure'] = 'Invalid test file structure';
+$string['invalidfilecount'] = 'Only upload 1 test file';
