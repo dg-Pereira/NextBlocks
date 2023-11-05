@@ -314,7 +314,7 @@ function createForcedInputBlock(prompt, inputFunctionDeclarations) {
     // eslint-disable-next-line no-unused-vars
     javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
         const text = block.getFieldValue(prompt);
-        let blockCode = `input${prompt}(${text})`;
+        let blockCode = `input${prompt}('${text}')`;
         return [blockCode, Blockly.JavaScript.ORDER_NONE];
     };
 }
