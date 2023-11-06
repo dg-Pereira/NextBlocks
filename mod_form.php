@@ -155,7 +155,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         $usercontext = context_user::instance($USER->id);
         $fs = get_file_storage();
         $files = $fs->get_area_files($usercontext->id, 'user', 'draft', $data['attachments'], 'id', false);
-        if (count($files) == 1) {
+        if (count($files) === 1) {
             $file = reset($files);
             $fileString = $file->get_content();
             if (file_structure_is_valid($fileString)) {

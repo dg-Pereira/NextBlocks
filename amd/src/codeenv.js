@@ -31,6 +31,10 @@ const toolbox = {
             'contents': [
                 {
                     'kind': 'block',
+                    'type': 'start',
+                },
+                {
+                    'kind': 'block',
                     'type': 'controls_if',
                 },
                 {
@@ -194,6 +198,8 @@ export const init = (contents, loadedSave) => {
     // Load the save, if there is one
     if (loadedSave !== null) {
         loadSave(loadedSave, nextblocksWorkspace);
+    } else {
+        addBlockToWorkspace('start', nextblocksWorkspace);
     }
     setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
 };
@@ -385,6 +391,26 @@ Blockly.Blocks.text_multiline_input = {
         this.setTooltip("");
         this.setHelpUrl("");
     }
+};
+
+Blockly.Blocks.start = {
+    init: function() {
+        this.appendDummyInput()
+            .appendField("start");
+        this.setNextStatement(true, null);
+        this.setColour(60);
+        this.setTooltip("");
+        this.setHelpUrl("");
+        this.setDeletable(false);
+    }
+};
+
+// eslint-disable-next-line no-unused-vars
+javascript.javascriptGenerator.forBlock['start'] = function(block, generator) {
+    // TODO: Assemble javascript into code variable.
+    // get all blocks attached to this block
+    let code = '';
+    return code;
 };
 
 // eslint-disable-next-line no-unused-vars
