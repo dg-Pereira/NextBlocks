@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @return true | null True if the feature is supported, null otherwise.
  */
-function nextblocks_supports($feature) {
+function nextblocks_supports(string $feature): ?bool {
     switch ($feature) {
     case FEATURE_MOD_INTRO:
         return true;
@@ -47,12 +47,14 @@ function nextblocks_supports($feature) {
  * in mod_form.php) this function will create a new instance and return the id
  * number of the instance.
  *
- * @param object                  $moduleinstance An object from the form.
- * @param mod_nextblocks_mod_form $mform          The form.
+ * @param object                       $moduleinstance An object from the form.
+ * @param mod_nextblocks_mod_form|null $mform          The form.
  *
  * @return int The id of the newly inserted record.
+ * @throws dml_exception
+ * @throws moodle_exception
  */
-function nextblocks_add_instance($moduleinstance, $mform = null) {
+function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form $mform = null): int {
     global $DB;
 
     $moduleinstance->timecreated = time();
@@ -108,13 +110,19 @@ function hasTestsFile(object $fromform): bool
     return count($files) > 0;
 }
 
-function file_structure_is_valid(string $file_string)
-{
+function file_structure_is_valid(string $file_string): bool {
     // Validate file structure with regular expression
     $exp = "/(\|\s+(_\s+\w+\s+(\w+\s+)+)*-\s+(\w+\s+)+)+/";
     return preg_match_all($exp, $file_string) !== 1;
 }
 
+/**
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws stored_file_creation_exception
+ * @throws file_exception
+ * @throws Exception
+ */
 function convert_tests_file_to_json(int $id)
 {
     global $PAGE;
@@ -144,12 +152,15 @@ function convert_tests_file_to_json(int $id)
     $new_file->delete();
 }
 
+/**
+ * @throws dml_exception
+ */
 function save_tests_file_hash(int $id)
 {
     global $DB;
     $pathnamehash = $DB->get_field('files', 'pathnamehash', ['component' => 'mod_nextblocks', 'filearea' => 'attachment', 'itemid' => $id]);
     //if file exists, i.e., a tests file was uploaded, save the hash of the file in the database, else it stays null
-    if($pathnamehash != false){
+    if($pathnamehash){
         $DB->set_field('nextblocks', 'testsfilehash', $pathnamehash, ['id' => $id]);
     }
 }
@@ -162,8 +173,7 @@ function save_tests_file_hash(int $id)
 function get_filenamehash(int $id)
 {
     global $DB;
-    $pathnamehash = $DB->get_field('files', 'pathnamehash', ['component' => 'mod_nextblocks', 'filearea' => 'attachment', 'itemid' => $id]);
-    return $pathnamehash;
+    return $DB->get_field('files', 'pathnamehash', ['component' => 'mod_nextblocks', 'filearea' => 'attachment', 'itemid' => $id]);
 }
 
 function save_tests_file(object $fromform, int $id)
@@ -194,10 +204,11 @@ function save_tests_file(object $fromform, int $id)
 // TODO a more formal file format description
 /**
  * @param String $fileString The contents of the tests file
+ *
  * @return array [{}] An array of test cases, each test case containing a list of inputs and an output, in JSON format
  * @throws Exception If the file is not in the correct format
  */
-function parse_tests_file($fileString): array
+function parse_tests_file(String $fileString): array
 {
     try {
         // The returned object has a list of test cases
@@ -244,19 +255,19 @@ function parse_tests_file($fileString): array
     }
 }
 
-
 /**
  * Updates an instance of the mod_nextblocks in the database.
  *
  * Given an object containing all the necessary data (defined in mod_form.php),
  * this function will update an existing instance with new data.
  *
- * @param object                  $moduleinstance An object from the form in mod_form.php.
- * @param mod_nextblocks_mod_form $mform          The form.
+ * @param object                       $moduleinstance An object from the form in mod_form.php.
+ * @param mod_nextblocks_mod_form|null $mform          The form.
  *
  * @return bool True if successful, false otherwise.
+ * @throws dml_exception
  */
-function nextblocks_update_instance($moduleinstance, $mform = null) {
+function nextblocks_update_instance(object $moduleinstance, mod_nextblocks_mod_form $mform = null): bool {
     global $DB;
 
     $moduleinstance->timemodified = time();
@@ -271,8 +282,9 @@ function nextblocks_update_instance($moduleinstance, $mform = null) {
  * @param int $id Id of the module instance.
  *
  * @return bool True if successful, false on failure.
+ * @throws dml_exception
  */
-function nextblocks_delete_instance($id) {
+function nextblocks_delete_instance(int $id): bool {
     global $DB;
 
     $exists = $DB->get_record('nextblocks', array('id' => $id));

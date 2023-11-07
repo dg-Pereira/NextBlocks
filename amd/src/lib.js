@@ -48,7 +48,7 @@ export const replaceCode = (code, inputFuncDecsN) => {
  * @param {boolean} debugMode whether to display the code as is, or with the wrapper function
  * @returns {string} the formatted code
  */
-const formatCodeHTML = (code, inputFuncDecsN, debugMode = false) => {
+const formatCodeHTML = (code, inputFuncDecsN, debugMode = true) => {
     if (!debugMode) {
         code = removeForcedInputFunctions(code, inputFuncDecsN);
         code = removeOutputString(code);
