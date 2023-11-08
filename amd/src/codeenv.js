@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-import {getWorkspaceCode, replaceCode, runTests, silentRunCode, testsAccordion} from "./lib";
+import { getMissingInputCalls, getWorkspaceCode, replaceCode, runTests, silentRunCode, testsAccordion } from './lib';
 import {saveWorkspace} from "./repository";
 
 const toolbox = {
@@ -263,8 +263,16 @@ function setupButtons(tests, workspace, inputFuncDecs) {
         // Listen for clicks on the run tests button
         const runTestsButton = document.getElementById('runTestsButton');
         runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
-            const results = runTests(workspace, tests, inputFuncDecs);
-            displayTestResults(results, tests);
+            const code = getWorkspaceCode(workspace, inputFuncDecs);
+            const uncalledInputFuncs = getMissingInputCalls(code, inputFuncDecs);
+            let results;
+            // If not all input functions are called, automatically fails all tests
+            if (uncalledInputFuncs.length > 0) {
+                results = null;
+            } else {
+                results = runTests(code, tests);
+            }
+            displayTestResults(results, tests, uncalledInputFuncs);
         });
     }
 
@@ -324,12 +332,14 @@ function createForcedInputBlock(prompt, inputFunctionDeclarations) {
 }
 
 /**
- * @param {any[]} results
- * @param {{}} tests
+ * @param {any[]} results The results of the tests
+ * @param {{}} tests The tests that were run
+ * @param {String[]} uncalledInputFuncs The names of the input functions that were not called in the code, if any
+ * Displays the results of the tests in the output div
  */
-function displayTestResults(results, tests) {
+function displayTestResults(results, tests, uncalledInputFuncs) {
     const testResultsDiv = document.getElementById('output-div');
-    testResultsDiv.innerHTML = testsAccordion(results, tests);
+    testResultsDiv.innerHTML = testsAccordion(results, tests, uncalledInputFuncs);
 }
 
 /**
@@ -406,7 +416,7 @@ Blockly.Blocks.start = {
 };
 
 // eslint-disable-next-line no-unused-vars
-javascript.javascriptGenerator.forBlock['start'] = function(block, generator) {
+javascript.javascriptGenerator.forBlock.start = function(block, generator) {
     // TODO: Assemble javascript into code variable.
     // get all blocks attached to this block
     let code = '';

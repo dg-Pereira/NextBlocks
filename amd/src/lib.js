@@ -101,13 +101,11 @@ const removeOutputString = (code) => {
 /**
  * Runs the tests on the given workspace and returns an array of booleans, one for each test, indicating whether
  * the test passed or not
- * @param {WorkspaceSvg} workspace the workspace to run the tests on
+ * @param {String} code the workspace to run the tests on
  * @param {{}} tests the tests to run
- * @param {string} inputFuncDecs the function declarations for the forced input functions
- * @returns {any[]} an array of booleans, one for each test, indicating whether the test passed or not
+ * @returns {String[]} the results of each test
  */
-export const runTests = (workspace, tests, inputFuncDecs) => {
-    const code = getWorkspaceCode(workspace, inputFuncDecs);
+export const runTests = (code, tests) => {
     let results = [];
     tests.forEach((test) => {
         let thisTestCode = code; // Need to copy, so that the code is not modified for the next test
@@ -117,12 +115,12 @@ export const runTests = (workspace, tests, inputFuncDecs) => {
             const values = input[prompt];
 
             const inputIndex = thisTestCode.lastIndexOf(prompt);
-            // Get index of first string literal after prompt
-            let inputQuote1 = thisTestCode.indexOf('(', inputIndex);
-            const inputQuote2 = thisTestCode.indexOf(')', inputQuote1 + 1);
+            // Get the indexes of the first and second parentheses of the input function call
+            let inputParentheses1 = thisTestCode.indexOf('(', inputIndex);
+            const inputParentheses2 = thisTestCode.indexOf(')', inputParentheses1 + 1);
 
-            const preStr = thisTestCode.substring(0, inputQuote1 + 1);
-            const postStr = thisTestCode.substring(inputQuote2);
+            const preStr = thisTestCode.substring(0, inputParentheses1 + 1);
+            const postStr = thisTestCode.substring(inputParentheses2);
 
             thisTestCode = preStr + values[0] + postStr;
 
@@ -135,6 +133,43 @@ export const runTests = (workspace, tests, inputFuncDecs) => {
     });
     return results;
 };
+
+/**
+ * @param {String} code the code to check for input function calls
+ * @param {string} inputFuncDecs the function declarations for the forced input functions
+ * @returns {String[]} whether the code has all input function calls
+ */
+export function getMissingInputCalls(code, inputFuncDecs) {
+    // Regex to match input function calls outside of comments
+    const regex = /((?!\/\/ ).{3}|^.{0,2})\binput\w+\s*\([^)]*\)(?=\s*;|\s*\)|\s*[,)])/g;
+    const functionDecNames = extractFunctionNames(inputFuncDecs);
+    const matches = code.match(regex);
+
+    if (matches === null) {
+        return functionDecNames;
+    }
+    const functionCallNames = matches.map((match) => match.match(/\b(\w+)(?=\s*\()/g)).flat();
+
+    //return all function declarations that are not called
+    return functionDecNames.filter((name) => !functionCallNames.includes(name));
+}
+
+/**
+ * @param {String} input the code to extract the function names from
+ * @returns {String[]} the names of the functions declared in the given code
+ */
+// eslint-disable-next-line no-unused-vars
+function extractFunctionNames(input) {
+    const regex = /function\s+(\w+)\s*\(/g;
+    const functionNames = [];
+    let match;
+
+    while ((match = regex.exec(input)) !== null) {
+        functionNames.push(match[1]);
+    }
+
+    return functionNames;
+}
 
 /**
  * @param {String} code The Javascript code to be run
@@ -199,21 +234,32 @@ function generateDescendantsCode(block) {
 
 /**
  * Inserts the test results accordion in the area above the Run and Tests buttons
- * @param {any[]} results the results of the tests (pass/fail)
+ * @param {any[]|null} results the results of the tests (pass/fail)
  * @param {{}} testsJSON the tests that were run (for displaying the inputs and outputs)
+ * @param {String[]} uncalledInputFuncs the input functions that were not called. Note: if this is not empty, results is null
  * @returns {string} the HTML for the accordion
  */
-export const testsAccordion = (results, testsJSON) => {
+export const testsAccordion = (results, testsJSON, uncalledInputFuncs) => {
+
     const testCaseCount = testsJSON.length;
 
     let accordion = '<div style="max-height: 100%; overflow-y: auto;">';
+    if (results === null) {
+        accordion += '<div class="alert alert-warning" role="alert">';
+        accordion += 'Not all input functions were called. No tests will be run.';
+        // Show which input functions were not called
+        accordion += '<br>Input functions not called: ' + uncalledInputFuncs.join(', ');
+        accordion += '</div>';
+    }
 
     for (let i = 0; i < testCaseCount; i++) {
         accordion += '<details class="card">';
         accordion += '<summary class="card-header">';
         accordion += 'Test ' + (i + 1);
         // Show if test passed or failed
-        if (results[i] === testsJSON[i].output) {
+        if (results === null || results[i] === undefined){
+            accordion += '<span class="badge badge-warning float-right">Not run</span>';
+        } else if (results[i] === testsJSON[i].output) {
             accordion += '<span class="badge badge-success float-right">Passed</span>';
         } else {
             accordion += '<span class="badge badge-danger float-right">Failed</span>';
@@ -231,7 +277,11 @@ export const testsAccordion = (results, testsJSON) => {
         accordion += '<pre class="mt-1 mb-0 mr-0 ml-0 test-output">' + testsJSON[i].output + '</pre>';
         accordion += '<div class="p-0">';
         accordion += '<p class="pt-2 m-0">Your output: </p>';
-        accordion += '<pre class="pb-2 mt-1 mb-0 ml-0 mr-0 test-output">' + results[i] + '</pre>';
+        if (results === null) {
+            accordion += '<pre class="mt-1 mb-0 mr-0 ml-0 test-output">Not run</pre>';
+        } else {
+            accordion += '<pre class="pb-2 mt-1 mb-0 ml-0 mr-0 test-output">' + results[i] + '</pre>';
+        }
         accordion += '</div>';
         accordion += '</details>';
     }

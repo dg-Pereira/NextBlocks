@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+global $plugin;
 
 /**
  * Plugin version and other meta-data are defined here.
@@ -24,7 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_nextblocks';
+//$plugin->component = 'mod_nextblocks';
+$plugin->type = "mod";
+$plugin->name = 'nextblocks';
 $plugin->release = '0.1.0';
 $plugin->version = 2023090700;
 $plugin->requires = 2021051700;
