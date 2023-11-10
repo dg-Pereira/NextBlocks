@@ -28,10 +28,6 @@ const toolbox = {
             'contents': [
                 {
                     'kind': 'block',
-                    'type': 'start',
-                },
-                {
-                    'kind': 'block',
                     'type': 'controls_if',
                 },
                 {
