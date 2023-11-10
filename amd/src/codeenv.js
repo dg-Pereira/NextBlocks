@@ -1,6 +1,6 @@
 /**
  *
- * @module      mod_nextblocks/env
+ * @module      mod_nextblocks/codeenv
  * @copyright   2023 Duarte Pereira<dg.pereira@campus.fct.unl.pt>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -8,9 +8,6 @@
 /* globals Blockly */
 
 /* globals javascript */
-
-import { getMissingInputCalls, getWorkspaceCode, replaceCode, runTests, silentRunCode, testsAccordion } from './lib';
-import {saveWorkspace} from "./repository";
 
 const toolbox = {
     'kind': 'categoryToolbox',
@@ -160,49 +157,131 @@ const options = {
 // GetMainWorkspace might remove need for global variable
 let nextblocksWorkspace;
 
-/**
- * @param {String} contents The contents of the tests file
- * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
- */
-export const init = (contents, loadedSave) => {
-    const blocklyDiv = document.getElementById('blocklyDiv');
-    const blocklyArea = document.getElementById('blocklyArea');
-    nextblocksWorkspace = Blockly.inject(blocklyDiv, options);
+define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, repository) {
+    /**
+     * @param {CodeString} code The Javascript code to be run
+     * Runs the code and displays the output in the output div
+     */
+    function runCode(code) {
+        const output = lib.silentRunCode(code.getCompleteCodeString());
+        // Replace newlines with <br /> so that they are displayed correctly
+        const outputHTML = output.replace(/\n/g, "<br />");
+        const outputDiv = document.getElementById('output-div');
+        // Wrap the output in a div with max-height and overflow-y: auto to make it scrollable if too long (multiline input)
+        outputDiv.innerHTML = `<div style="max-height: 100%; overflow-y: auto;"><pre>${outputHTML}</pre></div>`;
+    }
 
-    // Use resize observer instead of window resize event. This captures both window resize and element resize
-    const resizeObserver = new ResizeObserver(() => onResize(blocklyArea, blocklyDiv, nextblocksWorkspace));
-    resizeObserver.observe(blocklyArea);
+    /**
+     * Saves the current state of the workspace to the database, for later retrieval and display
+     */
+    const saveState = () => {
+        const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
+        // eslint-disable-next-line no-unused-vars
+        const stateB64 = btoa(JSON.stringify(state));
+        // eslint-disable-next-line no-unused-vars
+        const cmid = getCMID();
+        repository.saveWorkspace(cmid, stateB64);
+    };
 
-    // Parse json from contents
-    const tests = JSON.parse(contents);
+    /**
+     * @param {any[]} results The results of the tests
+     * @param {{}} tests The tests that were run
+     * @param {String[]} uncalledInputFuncs The names of the input functions that were not called in the code, if any
+     * Displays the results of the tests in the output div
+     */
+    function displayTestResults(results, tests, uncalledInputFuncs) {
+        const testResultsDiv = document.getElementById('output-div');
+        testResultsDiv.innerHTML = lib.testsAccordion(results, tests, uncalledInputFuncs);
+    }
 
-    let inputFunctionDeclarations = {funcDecs: ""};
-
-    if (tests !== null) {
-        // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
-        // was a workspace to load, they would be added twice.
-        const inputs = tests[0].inputs;
-        inputs.forEach((input, i) => {
-            const inputName = Object.keys(input)[0];
-            createForcedInputBlock(inputName, inputFunctionDeclarations); // Doesn't add block to workspace, just
-                                                                          // defines it. Needed for save loading
-
-            if (loadedSave === null) { // Only add to workspace if there is no workspace to load
-                const blockName = "forced_input_" + inputName;
-                let newBlock = addBlockToWorkspace(blockName, nextblocksWorkspace);
-                newBlock.moveBy(0, i * 50); // Move block down a bit so that they don't overlap
-            }
+    /**
+     * @param {{}} tests The tests to be run
+     * @param {WorkspaceSvg} workspace The workspace to get the code from
+     * @param {string} inputFuncDecs
+     */
+    function setupButtons(tests, workspace, inputFuncDecs) {
+        // Listen for clicks on the run button
+        const runButton = document.getElementById('runButton');
+        runButton.addEventListener('click', function() {
+            // eslint-disable-next-line no-unused-vars
+            const code = lib.getWorkspaceCode(workspace, inputFuncDecs);
+            // Each function has 3 lines, so we divide by 3 to get the number of functions
+            // eslint-disable-next-line no-unused-vars
+            const inputFuncDecsCount = inputFuncDecs.split('\n').length / 3;
+            lib.replaceCode(code, inputFuncDecsCount);
+            runCode(code);
         });
+
+        if (tests !== null) {
+            // Listen for clicks on the run tests button
+            const runTestsButton = document.getElementById('runTestsButton');
+            runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
+                const code = lib.getWorkspaceCode(workspace, inputFuncDecs).getCompleteCodeString();
+                const uncalledInputFuncs = lib.getMissingInputCalls(code, inputFuncDecs);
+                let results;
+                // If not all input functions are called, automatically fails all tests
+                if (uncalledInputFuncs.length > 0) {
+                    results = null;
+                } else {
+                    results = lib.runTests(code, tests);
+                }
+                displayTestResults(results, tests, uncalledInputFuncs);
+            });
+        }
+
+        // Listen for clicks on the save button
+        const saveButton = document.getElementById('saveButton');
+        saveButton.addEventListener('click', saveState);
     }
 
-    // Load the save, if there is one
-    if (loadedSave !== null) {
-        loadSave(loadedSave, nextblocksWorkspace);
-    } else {
-        addBlockToWorkspace('start', nextblocksWorkspace);
-    }
-    setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
-};
+    return {
+        /**
+         * @param {String} contents The contents of the tests file
+         * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
+         */
+        init: function(contents, loadedSave) {
+            const blocklyDiv = document.getElementById('blocklyDiv');
+            const blocklyArea = document.getElementById('blocklyArea');
+            nextblocksWorkspace = Blockly.inject(blocklyDiv, options);
+            javascript.javascriptGenerator.init(nextblocksWorkspace);
+
+            // Use resize observer instead of window resize event. This captures both window resize and element resize
+            const resizeObserver = new ResizeObserver(() => onResize(blocklyArea, blocklyDiv, nextblocksWorkspace));
+            resizeObserver.observe(blocklyArea);
+
+            // Parse json from contents
+            const tests = JSON.parse(contents);
+            let inputFunctionDeclarations = {funcDecs: ""};
+
+            if (tests !== null) {
+                // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
+                // was a workspace to load, they would be added twice.
+                const inputs = tests[0].inputs;
+
+                inputs.forEach((input, i) => {
+                    const inputName = Object.keys(input)[0];
+                    createForcedInputBlock(inputName, inputFunctionDeclarations); // Doesn't add block to workspace, just
+                                                                                  // defines it. Needed for save loading
+
+                    if (loadedSave === null) { // Only add to workspace if there is no workspace to load
+                        const blockName = "forced_input_" + inputName;
+                        let newBlock = addBlockToWorkspace(blockName, nextblocksWorkspace);
+                        newBlock.moveBy(0, i * 50); // Move block down a bit so that they don't overlap
+                    }
+                });
+            }
+
+            // Load the save, if there is one
+            if (loadedSave !== null) {
+                loadSave(loadedSave, nextblocksWorkspace);
+            } else {
+                addBlockToWorkspace('start', nextblocksWorkspace);
+            }
+
+            setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
+        }
+    };
+});
 
 const onResize = function(blocklyArea, blocklyDiv, nextblocksWorkspace) {
     // Compute the absolute coordinates and dimensions of blocklyArea.
@@ -244,54 +323,6 @@ function loadSave(loadedSave, workspace) {
 }
 
 /**
- * @param {{}} tests The tests to be run
- * @param {WorkspaceSvg} workspace The workspace to get the code from
- * @param {string} inputFuncDecs
- */
-function setupButtons(tests, workspace, inputFuncDecs) {
-    // Listen for clicks on the run button
-    const runButton = document.getElementById('runButton');
-    runButton.addEventListener('click', function() {
-        const code = getWorkspaceCode(workspace, inputFuncDecs);
-        // Each function has 3 lines, so we divide by 3 to get the number of functions
-        const inputFuncDecsN = inputFuncDecs.split('\n').length / 3;
-        replaceCode(code, inputFuncDecsN);
-        runCode(code);
-    });
-
-    if (tests !== null) {
-        // Listen for clicks on the run tests button
-        const runTestsButton = document.getElementById('runTestsButton');
-        runTestsButton.addEventListener('click', () => { // Needs anonymous function wrap to pass argument
-            const code = getWorkspaceCode(workspace, inputFuncDecs);
-            const uncalledInputFuncs = getMissingInputCalls(code, inputFuncDecs);
-            let results;
-            // If not all input functions are called, automatically fails all tests
-            if (uncalledInputFuncs.length > 0) {
-                results = null;
-            } else {
-                results = runTests(code, tests);
-            }
-            displayTestResults(results, tests, uncalledInputFuncs);
-        });
-    }
-
-    // Listen for clicks on the save button
-    const saveButton = document.getElementById('saveButton');
-    saveButton.addEventListener('click', saveState);
-}
-
-/**
- * Saves the current state of the workspace to the database, for later retrieval and display
- */
-export const saveState = async() => {
-    const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
-    const stateB64 = btoa(JSON.stringify(state));
-    const cmid = getCMID();
-    await saveWorkspace(cmid, stateB64);
-};
-
-/**
  * @returns {Number} The course module id of the current page
  */
 function getCMID() {
@@ -331,31 +362,6 @@ function createForcedInputBlock(prompt, inputFunctionDeclarations) {
     };
 }
 
-/**
- * @param {any[]} results The results of the tests
- * @param {{}} tests The tests that were run
- * @param {String[]} uncalledInputFuncs The names of the input functions that were not called in the code, if any
- * Displays the results of the tests in the output div
- */
-function displayTestResults(results, tests, uncalledInputFuncs) {
-    const testResultsDiv = document.getElementById('output-div');
-    testResultsDiv.innerHTML = testsAccordion(results, tests, uncalledInputFuncs);
-}
-
-/**
- * @param {String} code The Javascript code to be run
- * Runs the code and displays the output in the output div
- */
-function runCode(code) {
-    const output = silentRunCode(code);
-    // Replace newlines with <br /> so that they are displayed correctly
-    const outputHTML = output.replace(/\n/g, "<br />");
-    const outputDiv = document.getElementById('output-div');
-
-    // Wrap the output in a div with max-height and overflow-y: auto to make it scrollable if too long (multiline input)
-    outputDiv.innerHTML = `<div style="max-height: 100%; overflow-y: auto;"><pre>${outputHTML}</pre></div>`;
-}
-
 // eslint-disable-next-line no-extend-native
 String.prototype.hideWrapperFunction = function() {
     const lines = this.split('\n');
@@ -363,7 +369,6 @@ String.prototype.hideWrapperFunction = function() {
     return lines.join('\n');
 };
 
-// eslint-disable-next-line no-unused-vars
 // Redefine the text_print block to use the outputString variable instead of alert.
 javascript.javascriptGenerator.forBlock.text_print = function(block, generator) {
     return (
