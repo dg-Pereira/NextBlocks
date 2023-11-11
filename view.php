@@ -76,7 +76,7 @@ $filenamehash = get_filenamehash($instanceid);
 $tests_file = $fs->get_file_by_hash($filenamehash);
 $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
 $PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace]);
-//$PAGE->requires->js_call_amd('mod_nextblocks/test', 'init');
+
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
 $PAGE->set_heading(format_string($course->fullname));

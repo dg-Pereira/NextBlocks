@@ -61,3 +61,8 @@ $string['nextblocks_tab_edit'] = "Test";
 $string['pluginadministration'] = 'NextBlocks Administration';
 $string['invalidfilestructure'] = 'Invalid test file structure';
 $string['invalidfilecount'] = 'Only upload 1 test file';
+$string['blockdefinition'] = 'Custom block definition';
+$string['blockdefinition_help'] = 'Definition code for the custom block.';
+$string['blockgenerator'] = 'Custom block generator';
+$string['blockgenerator_help'] = 'Custom block generator function';
+$string['customblockstext'] = '<p> Create a custom Blockly block. Intended for advanced users. <br> Please note that the custom block code is not validated in any way, so if the definition or the generator are not correct, the custom block will not work. <br> For help creating a custom block, visit <a target=”_blank” href="https://blockly-demo.appspot.com/static/demos/blockfactory/index.html">https://blockly-demo.appspot.com/static/demos/blockfactory/index.html</a> </p>';

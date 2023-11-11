@@ -132,10 +132,20 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         //<<------------------------------------------ Custom Blocks tab ------------------------------------------>>//
 
+        function addCustomBlocksInputs($mform) {
+            $mform->addElement('textarea', 'blockdefinition', get_string("blockdefinition", "mod_nextblocks"),
+                'wrap="virtual" rows="8" cols="80"');
+            $mform->addHelpButton('blockdefinition', 'blockdefinition', 'mod_nextblocks');
+            $mform->setType('blockdefinition', PARAM_TEXT);
+            $mform->addElement('textarea', 'blockgenerator', get_string("blockgenerator", "mod_nextblocks"),
+                'wrap="virtual" rows="8" cols="80"');
+            $mform->addHelpButton('blockgenerator', 'blockgenerator', 'mod_nextblocks');
+            $mform->setType('blockgenerator', PARAM_TEXT);
+        }
+
         $mform->addElement('header', 'customblocks', get_string('nextblockscreatecustomblocks', 'mod_nextblocks'));
-        $mform->addElement('text', 'customblocksinput', get_string('customblocksinput', 'mod_nextblocks'));
-        $mform->addHelpButton('customblocksinput', 'customblocksinput', 'mod_nextblocks');
-        $mform->setType('customblocksinput', PARAM_TEXT);
+        $mform->addElement('html', get_string('customblockstext', 'mod_nextblocks'));
+        addCustomBlocksInputs($mform);
 
         //<<------------------------------------------ Primitive Restricions tab ------------------------------------------>>//
 

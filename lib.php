@@ -76,6 +76,10 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
         // When the form is submitted, and the data is successfully validated,
         // the `get_data()` function will return the data posted in the form.
 
+        // Save custom blocks
+        save_custom_blocks($fromform, $id);
+
+
         if(hasTestsFile($fromform)) {
             //save the tests file in File API
             save_tests_file($fromform, $id);
@@ -102,6 +106,19 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
     }
 
     return $id;
+}
+
+/**
+ * @throws dml_exception
+ */
+function save_custom_blocks(object $fromform, int $id)
+{
+    global $DB;
+    //get blockdefinition element from form
+    $blockdefinition = $fromform->blockdefinition;
+    $blockgenerator = $fromform->blockgenerator;
+    //save in the mdl_nextblocks_customblocks table
+    $DB->insert_record('nextblocks_customblocks', ['blockdefinition' => $blockdefinition, 'blockgenerator' => $blockgenerator, 'nextblocksid' => $id]);
 }
 
 function hasTestsFile(object $fromform): bool
