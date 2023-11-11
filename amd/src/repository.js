@@ -1,9 +1,21 @@
-import {call as fetchMany} from 'core/ajax';
+/**
+ *
+ * @module      mod_nextblocks/repository
+ * @copyright   2023 Duarte Pereira<dg.pereira@campus.fct.unl.pt>
+ * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
-export const saveWorkspace = (nextblocksid, saved_workspace) => fetchMany([{
-    methodname: 'mod_nextblocks_save_workspace',
-    args: {
-        nextblocksid: nextblocksid,
-        saved_workspace: saved_workspace,
-    },
-}])[0];
+// eslint-disable-next-line no-unused-vars
+define(['core/ajax'], function(ajax) {
+    return {
+        saveWorkspace: function(nextblocksid, saved_workspace) {
+            return ajax.call([{
+                methodname: 'mod_nextblocks_save_workspace',
+                args: {
+                    nextblocksid: nextblocksid,
+                    saved_workspace: saved_workspace,
+                },
+            }])[0];
+        }
+    };
+});

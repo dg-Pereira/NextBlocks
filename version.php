@@ -25,6 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_nextblocks';
+$plugin->type = "mod";
+$plugin->name = 'nextblocks';
 $plugin->release = '0.1.0';
 $plugin->version = 2023090700;
 $plugin->requires = 2021051700;
