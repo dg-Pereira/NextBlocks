@@ -70,12 +70,22 @@ $instanceid = $cm->instance;
 $record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cmid));
 $saved_workspace = $record ? $record->saved_workspace : null;
 
+// get custom blocks
+$custom_blocks = $DB->get_records('nextblocks_customblocks', array('nextblocksid' => $instanceid));
+$custom_blocks_json = array();
+foreach ($custom_blocks as $custom_block) {
+    $custom_blocks_json[] = array(
+        'definition' => $custom_block->blockdefinition,
+        'generator' => $custom_block->blockgenerator
+    );
+}
+
 $fs = get_file_storage();
 $filenamehash = get_filenamehash($instanceid);
 
 $tests_file = $fs->get_file_by_hash($filenamehash);
 $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace]);
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
