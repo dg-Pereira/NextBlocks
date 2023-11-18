@@ -42,7 +42,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
      * @throws coding_exception
      */
     public function definition() {
-        global $CFG;
+        global $CFG, $DB;
 
         $mform = $this->_form;
 
@@ -145,7 +145,41 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'customblocks', get_string('nextblockscreatecustomblocks', 'mod_nextblocks'));
         $mform->addElement('html', get_string('customblockstext', 'mod_nextblocks'));
-        addCustomBlocksInputs($mform);
+
+        $repeatarray = [
+            $mform->createElement('textarea', 'definition', get_string('blockdefinition', 'mod_nextblocks'), 'wrap="virtual" rows="8" cols="80"'),
+            $mform->createElement('textarea', 'generator', get_string('blockgenerator', 'mod_nextblocks'), 'wrap="virtual" rows="8" cols="80"'),
+            $mform->createElement('hidden', 'optionid', 0),
+            $mform->createElement('submit', 'delete', get_string('deletestr', 'mod_nextblocks'), [], false),
+        ];
+
+        $repeatoptions = [
+            'definition' => [
+                'type' => PARAM_TEXT,
+
+            ],
+            'generator' => [
+                'type' => PARAM_TEXT,
+            ],
+            'optionid' => [
+                'type' => PARAM_INT,
+            ],
+        ];
+
+        $this->repeat_elements(
+            $repeatarray,
+            1,
+            $repeatoptions,
+            'option_repeats',
+            'option_add_fields',
+            1,
+            null,
+            true,
+            'delete',
+        );
+
+        //addCustomBlocksInputs($mform);
+        //$mform->addElement('button', 'addanothercustomblock', get_string('addanothercustomblock', 'mod_nextblocks'));
 
         //<<------------------------------------------ Primitive Restricions tab ------------------------------------------>>//
 

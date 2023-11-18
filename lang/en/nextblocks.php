@@ -66,3 +66,5 @@ $string['blockdefinition_help'] = 'Custom block definition. <br> Copy code from 
 $string['blockgenerator'] = 'Custom block generator';
 $string['blockgenerator_help'] = 'Custom block generator function. <br> Copy code from the <b> Generator stub </b> section of the Block Factory. Needs to be in JavaScript. You need to manually add the block code, in var code = ...';
 $string['customblockstext'] = '<p> Create a custom Blockly block. Intended for advanced users. <br> Please note that the custom block code is not validated in any way, so if the definition or the generator are not correct, the custom block will not work. <br> For help creating a custom block, visit <a target=”_blank” href="https://blockly-demo.appspot.com/static/demos/blockfactory/index.html">https://blockly-demo.appspot.com/static/demos/blockfactory/index.html</a> </p>';
+$string['addanothercustomblock'] = 'Add another custom block';
+$string['deletestr'] = 'Delete';

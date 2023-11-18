@@ -16,6 +16,13 @@ define(['core/ajax'], function(ajax) {
                     saved_workspace: saved_workspace,
                 },
             }])[0];
+        },
+
+        addCustomBlockCreationInterfaceElements: function() {
+            return ajax.call([{
+                methodname: 'mod_nextblocks_add_custom_blocks_inputs',
+                args: {},
+            }])[0];
         }
     };
 });
