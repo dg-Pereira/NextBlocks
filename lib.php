@@ -114,11 +114,16 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
 function save_custom_blocks(object $fromform, int $id)
 {
     global $DB;
-    //get blockdefinition element from form
-    $blockdefinition = $fromform->blockdefinition;
-    $blockgenerator = $fromform->blockgenerator;
-    //save in the mdl_nextblocks_customblocks table
-    $DB->insert_record('nextblocks_customblocks', ['blockdefinition' => $blockdefinition, 'blockgenerator' => $blockgenerator, 'nextblocksid' => $id]);
+
+    //get block definitions and generators from form
+    $blockdefinitions = $fromform->definition;
+    $blockgenerators = $fromform->generator;
+
+    //save each block definition and generator in the mdl_nextblocks_customblocks table
+    foreach ($blockdefinitions as $key => $blockdefinition) {
+        $blockgenerator = $blockgenerators[$key];
+        $DB->insert_record('nextblocks_customblocks', ['blockdefinition' => $blockdefinition, 'blockgenerator' => $blockgenerator, 'nextblocksid' => $id]);
+    }
 }
 
 function hasTestsFile(object $fromform): bool
