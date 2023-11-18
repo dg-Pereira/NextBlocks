@@ -114,10 +114,6 @@ let toolbox = {
                     'kind': 'block',
                     'type': 'text_multiline_input',
                 },
-                {
-                    'kind': 'block',
-                    'type': 'test_block',
-                }
             ],
         },
     ],
@@ -240,7 +236,6 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
          * @param {{}} customBlocks The custom blocks to be added to the toolbox, created by the exercise creator
          */
-        // eslint-disable-next-line no-unused-vars
         init: function(contents, loadedSave, customBlocks) {
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
@@ -259,8 +254,16 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             }
 
             customBlocks.forEach((block) => {
-                // eslint-disable-next-line no-unused-vars
-                const blockName = block.generator.split("forBlock['")[1].split("']")[0].trim();
+                let splitTest = block.generator.split("forBlock['");
+                let dotCase = false;
+                if (splitTest.length < 2) {
+                    splitTest = block.generator.split("forBlock.");
+                    if (splitTest.length < 2) {
+                        throw new Error("Invalid generator");
+                    }
+                    dotCase = true;
+                }
+                const blockName = splitTest[1].split(dotCase ? " = " : "']")[0].trim();
                 // Add block to toolbox
                 toolbox.contents[toolbox.contents.length - 1].contents.push({
                     'kind': 'block',
@@ -273,29 +276,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 eval(block.generator);
             });
 
-
-            /*
-                customBlocks.forEach((block) => {
-                // eslint-disable-next-line no-eval
-                //eval(block.definition);
-                // eslint-disable-next-line no-eval
-                //eval(block.generator);
-                const blockName = block.generator.split('forBlock[')[1].split(']')[0].trim();
-                // eslint-disable-next-line no-console
-                console.log(blockName);
-                // Add block to toolbox
-                toolbox.contents[toolbox.contents.length - 1].contents.push({
-                    'kind': 'block',
-                    'type': blockName,
-                });
-            });
-             */
-
             nextblocksWorkspace = Blockly.inject(blocklyDiv, options);
             javascript.javascriptGenerator.init(nextblocksWorkspace);
-
-            // eslint-disable-next-line no-console
-            console.log(toolbox);
 
             // Use resize observer instead of window resize event. This captures both window resize and element resize
             const resizeObserver = new ResizeObserver(() => onResize(blocklyArea, blocklyDiv, nextblocksWorkspace));
