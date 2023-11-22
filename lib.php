@@ -79,7 +79,6 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
         // Save custom blocks
         save_custom_blocks($fromform, $id);
 
-
         if(hasTestsFile($fromform)) {
             //save the tests file in File API
             save_tests_file($fromform, $id);
@@ -118,6 +117,14 @@ function save_custom_blocks(object $fromform, int $id)
     //get block definitions and generators from form
     $blockdefinitions = $fromform->definition;
     $blockgenerators = $fromform->generator;
+
+    if((count($blockdefinitions) == 1 && $blockdefinitions[0] == '') || (count($blockgenerators) == 1 && $blockgenerators[0] == '')){
+        return;
+    }
+
+    if(count($blockdefinitions) !== count($blockgenerators)){
+        throw new dml_exception('Block definitions and generators do not match');
+    }
 
     //save each block definition and generator in the mdl_nextblocks_customblocks table
     foreach ($blockdefinitions as $key => $blockdefinition) {

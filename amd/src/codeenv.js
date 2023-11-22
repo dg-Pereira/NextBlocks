@@ -253,6 +253,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 });
             }
 
+            // eslint-disable-next-line no-console
+            console.log(customBlocks);
             customBlocks.forEach((block) => {
                 let splitTest = block.generator.split("forBlock['");
                 let dotCase = false;

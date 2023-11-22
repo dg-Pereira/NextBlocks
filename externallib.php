@@ -33,8 +33,4 @@ class mod_nextblocks_external extends external_api {
     public static function save_workspace_returns() {
         return null;
     }
-
-    public static function mod_nextblocks_add_custom_blocks_inputs() {
-
-    }
 }
