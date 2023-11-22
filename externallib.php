@@ -22,7 +22,6 @@ class mod_nextblocks_external extends external_api {
 
     public static function save_workspace_parameters()
     {
-        error_log('Log test', 3, 'C:\wamp64\logs\php_error.log');
         return new external_function_parameters(
             array(
                 'nextblocksid' => new external_value(PARAM_INT, 'module id'),

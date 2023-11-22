@@ -9,7 +9,7 @@
 
 /* globals javascript */
 
-const toolbox = {
+let toolbox = {
     'kind': 'categoryToolbox',
     'readOnly': true,
     'contents': [
@@ -234,10 +234,50 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         /**
          * @param {String} contents The contents of the tests file
          * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
+         * @param {{}} customBlocks The custom blocks to be added to the toolbox, created by the exercise creator
          */
-        init: function(contents, loadedSave) {
+        init: function(contents, loadedSave, customBlocks) {
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
+
+            // If there are custom blocks, add a new category to the toolbox
+            if (customBlocks.length > 0) {
+                toolbox.contents.push({
+                    'kind': 'category',
+                    'name': 'Custom Blocks',
+                    'colour': 'a55b80',
+                    "cssConfig": {
+                        'icon': 'customIcon fa-solid fa-code',
+                    },
+                    'contents': [],
+                });
+            }
+
+            // eslint-disable-next-line no-console
+            console.log(customBlocks);
+            customBlocks.forEach((block) => {
+                let splitTest = block.generator.split("forBlock['");
+                let dotCase = false;
+                if (splitTest.length < 2) {
+                    splitTest = block.generator.split("forBlock.");
+                    if (splitTest.length < 2) {
+                        throw new Error("Invalid generator");
+                    }
+                    dotCase = true;
+                }
+                const blockName = splitTest[1].split(dotCase ? " = " : "']")[0].trim();
+                // Add block to toolbox
+                toolbox.contents[toolbox.contents.length - 1].contents.push({
+                    'kind': 'block',
+                    'type': blockName,
+                });
+
+                // eslint-disable-next-line no-eval
+                eval(block.definition);
+                // eslint-disable-next-line no-eval
+                eval(block.generator);
+            });
+
             nextblocksWorkspace = Blockly.inject(blocklyDiv, options);
             javascript.javascriptGenerator.init(nextblocksWorkspace);
 
