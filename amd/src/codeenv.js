@@ -179,6 +179,15 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         repository.saveWorkspace(cmid, stateB64);
     };
 
+    const submitWorkspace = () => {
+        const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
+        // eslint-disable-next-line no-unused-vars
+        const stateB64 = btoa(JSON.stringify(state));
+        // eslint-disable-next-line no-unused-vars
+        const cmid = getCMID();
+        repository.submitWorkspace(cmid, stateB64);
+    };
+
     /**
      * @param {any[]} results The results of the tests
      * @param {{}} tests The tests that were run
@@ -228,6 +237,10 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         // Listen for clicks on the save button
         const saveButton = document.getElementById('saveButton');
         saveButton.addEventListener('click', saveState);
+
+        //Listen for clicks on the submit button
+        const submitButton = document.getElementById('submitButton');
+        submitButton.addEventListener('click', submitWorkspace);
     }
 
     return {

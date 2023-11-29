@@ -35,6 +35,8 @@ function nextblocks_supports(string $feature): ?bool {
     switch ($feature) {
     case FEATURE_MOD_INTRO:
         return true;
+    case FEATURE_GRADE_HAS_GRADE:
+        return true;
     default:
         return null;
     }
@@ -92,6 +94,12 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
             //save hash of the file in the database for later file retrieval
             save_tests_file_hash($id);
         }
+
+        $record = $DB->get_record('nextblocks', array('id' => $id));
+        nextblocks_grade_item_update($record);
+
+        nextblocks_console_log("test");
+        nextblocks_console_log($record);
     } else {
         // This branch is executed if the form is submitted but the data doesn't
         // validate and the form should be redisplayed or on the first display of the form.
@@ -105,6 +113,36 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
     }
 
     return $id;
+}
+
+function nextblocks_update_grades($nextblocks, $userid=0, $nullifnone=true) {
+    global $CFG, $DB;
+    require_once($CFG->libdir.'/gradelib.php');
+
+    nextblocks_grade_item_update($nextblocks);
+    // Updating user's grades is not supported at this time in the logic module.
+    return;
+}
+
+function nextblocks_grade_item_update($nextblocks, $grades=null) {
+    global $CFG;
+    if (!function_exists('grade_update')) { //workaround for buggy PHP versions
+        require_once($CFG->libdir.'/gradelib.php');
+    }
+
+    if (property_exists($nextblocks, 'cm_id')) { //it may not be always present
+        $params = array('itemname'=>$nextblocks->name, 'idnumber'=>$nextblocks->cm_id);
+    } else {
+        $params = array('itemname'=>$nextblocks->name);
+    }
+
+    $params['gradetype'] = GRADE_TYPE_VALUE;
+    $params['grademax'] = 100;
+    $params['grademin'] = 0;
+
+    $grades = array(0 => 80);
+
+    return grade_update('mod/nextblocks', $nextblocks->course, 'mod', 'nextblocks', $nextblocks->id, 0, $grades, $params);
 }
 
 /**

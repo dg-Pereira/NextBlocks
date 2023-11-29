@@ -18,11 +18,14 @@ define(['core/ajax'], function(ajax) {
             }])[0];
         },
 
-        addCustomBlockCreationInterfaceElements: function() {
+        submitWorkspace: function(nextblocksid, saved_workspace) {
             return ajax.call([{
-                methodname: 'mod_nextblocks_add_custom_blocks_inputs',
-                args: {},
+                methodname: 'mod_nextblocks_submit_workspace',
+                args: {
+                    nextblocksid: nextblocksid,
+                    saved_workspace: saved_workspace,
+                },
             }])[0];
-        }
+        },
     };
 });
