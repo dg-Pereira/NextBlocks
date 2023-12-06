@@ -42,9 +42,9 @@ class mod_nextblocks_external extends external_api {
         $record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $nextblocksid));
         //if record exists with same userid and nextblocksid, update it, else insert new record
         if ($record) {
-            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $USER->id, 'nextblocksid' => $nextblocksid, 'saved_workspace' => $saved_workspace));
+            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $USER->id, 'nextblocksid' => $nextblocksid, 'submitted_workspace' => $saved_workspace));
         } else {
-            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $nextblocksid, 'saved_workspace' => $saved_workspace));
+            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $nextblocksid, 'submitted_workspace' => $saved_workspace));
         }
     }
 
