@@ -10,7 +10,7 @@ $lesson = $DB->get_record('nextblocks', array('id' => $cm->instance), '*', MUST_
 
 require_login($course, false, $cm);
 
-$PAGE->set_url('/mod/nextblocks/grade.php', array('id'=>$cm->id))
+$PAGE->set_url('/mod/nextblocks/grade.php', array('id'=>$cm->id));
 if (has_capability('mod/nextblocks:viewreports', context_module::instance($cm->id))) {
     redirect('report.php?id='.$cm->id);
 } else {

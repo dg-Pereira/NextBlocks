@@ -67,7 +67,7 @@ $cm = get_coursemodule_from_id('nextblocks', $cmid, 0, false, MUST_EXIST);
 $instanceid = $cm->instance;
 
 // call init, with saved workspace and tests file if they exist
-$record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cmid));
+$record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
 $saved_workspace = $record ? $record->saved_workspace : null;
 
 // get custom blocks
