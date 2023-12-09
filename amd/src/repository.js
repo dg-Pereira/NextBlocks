@@ -18,12 +18,12 @@ define(['core/ajax'], function(ajax) {
             }])[0];
         },
 
-        submitWorkspace: function(nextblocksid, saved_workspace) {
+        submitWorkspace: function(nextblocksid, submitted_workspace) {
             return ajax.call([{
                 methodname: 'mod_nextblocks_submit_workspace',
                 args: {
                     nextblocksid: nextblocksid,
-                    saved_workspace: saved_workspace,
+                    submitted_workspace: submitted_workspace,
                 },
             }])[0];
         },

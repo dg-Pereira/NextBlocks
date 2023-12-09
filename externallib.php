@@ -37,25 +37,25 @@ class mod_nextblocks_external extends external_api {
         return null;
     }
 
-    public static function submit_workspace($nextblocksid, $saved_workspace) {
+    public static function submit_workspace($nextblocksid, $submitted_workspace) {
         global $DB, $USER;
         $params = self::validate_parameters(self::submit_workspace_parameters(),
-            array('nextblocksid' => $nextblocksid, 'saved_workspace' => $saved_workspace));
+            array('nextblocksid' => $nextblocksid, 'submitted_workspace' => $submitted_workspace));
         $cm = get_coursemodule_from_id('nextblocks', $nextblocksid, 0, false, MUST_EXIST);
 
         //check if record exists
         $record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
         //if record exists with same userid and nextblocksid, update it, else insert new record
         if ($record) {
-            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $saved_workspace));
+            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $submitted_workspace));
         } else {
-            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $saved_workspace));
+            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $submitted_workspace));
         }
         $nextblocks = $DB->get_record('nextblocks', array('id' => $cm->instance));
 
         $grades = new stdClass();
         $grades->userid = $USER->id;
-        $grades->rawgrade = 70;
+        $grades->rawgrade = 97;
 
         /*
          * Make http request to localhost:4000/jobe/index.php/restapi/runs/ with the following json:
@@ -81,7 +81,7 @@ class mod_nextblocks_external extends external_api {
         return new external_function_parameters(
             array(
                 'nextblocksid' => new external_value(PARAM_INT, 'module id'),
-                'saved_workspace' => new external_value(PARAM_RAW, 'workspace'),
+                'submitted_workspace' => new external_value(PARAM_RAW, 'workspace'),
             )
         );
     }
