@@ -57,6 +57,22 @@ class mod_nextblocks_external extends external_api {
         $grades->userid = $USER->id;
         $grades->rawgrade = 70;
 
+        /*
+         * Make http request to localhost:4000/jobe/index.php/restapi/runs/ with the following json:
+         * {
+         *  "run_spec": {
+         *      "language_id": "c",
+         *      "sourcefilename": "test.c",
+         *      "sourcecode": "\n#include <stdio.h>\n\nint main() {\n    printf(\"Hello world\\n\");\n}\n"
+         *  }
+         *  }
+         *
+         * and the headers:
+         * Content-type: application/json; charset-utf-8
+         *
+         * Run docker container first
+         */
+
         nextblocks_grade_item_update($nextblocks, $grades);
     }
 
