@@ -176,7 +176,6 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
 
                     thisTestCode = preStr + values[0] + postStr;
                 });
-                // eslint-disable-next-line no-eval
                 let codeOutput = this.silentRunCode(thisTestCode);
                 codeOutput = codeOutput.replace(/\s/g, '');
                 const result = codeOutput;
