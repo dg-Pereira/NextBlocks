@@ -57,11 +57,10 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
      * Formats the code with correct HTML structure to be displayed in the code div
      * TODO: implement this function
      * @param {CodeString} code the code text to be formatted (string literal)
-     * @param {number} inputFuncDecsN the number of forced input function declarations
      * @param {boolean} debugMode whether to display the code as is, or with the wrapper function
      * @returns {string} the formatted code
      */
-    const formatCodeHTML = (code, inputFuncDecsN, debugMode = false) => {
+    const formatCodeHTML = (code, debugMode = false) => {
         if (!debugMode) {
             return "<pre>" + code.getPrintableCodeString() + "</pre>";
         } else {
@@ -84,11 +83,10 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
         /**
          * Inserts the new program code in the code div below the blockly area, replacing the old one if it exists
          * @param {CodeString} code the new program code to be displayed
-         * @param {number} inputFuncDecsN the number of forced input function declarations
          */
-        replaceCode: function(code, inputFuncDecsN) {
+        replaceCode: function(code) {
             const codeDiv = document.getElementById('codeDiv');
-            codeDiv.innerHTML = formatCodeHTML(code, inputFuncDecsN);
+            codeDiv.innerHTML = formatCodeHTML(code);
         },
 
         /**
@@ -155,7 +153,7 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
          * the test passed or not
          * @param {String} code the workspace to run the tests on
          * @param {{}} tests the tests to run
-         * @returns {String[]} the results of each test
+         * @returns {String[]} the output of each test
          */
         runTests: function(code, tests) {
             let results = [];

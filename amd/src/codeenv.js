@@ -179,8 +179,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         repository.saveWorkspace(cmid, stateB64);
     };
 
-    const submitWorkspace = () => {
-        const codeString = lib.getWorkspaceCode(nextblocksWorkspace, "").getSubmittableCodeString();
+    const submitWorkspace = (inputFuncDecs) => {
+        const codeString = lib.getWorkspaceCode(nextblocksWorkspace, inputFuncDecs).getSubmittableCodeString();
         const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
         const stateB64 = btoa(JSON.stringify(state));
         const cmid = getCMID();
@@ -207,12 +207,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         // Listen for clicks on the run button
         const runButton = document.getElementById('runButton');
         runButton.addEventListener('click', function() {
-            // eslint-disable-next-line no-unused-vars
             const code = lib.getWorkspaceCode(workspace, inputFuncDecs);
-            // Each function has 3 lines, so we divide by 3 to get the number of functions
-            // eslint-disable-next-line no-unused-vars
-            const inputFuncDecsCount = inputFuncDecs.split('\n').length / 3;
-            lib.replaceCode(code, inputFuncDecsCount);
+            lib.replaceCode(code);
             runCode(code);
         });
 
@@ -239,7 +235,9 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
         // Listen for clicks on the submit button
         const submitButton = document.getElementById('submitButton');
-        submitButton.addEventListener('click', submitWorkspace);
+        submitButton.addEventListener('click', () => {
+            submitWorkspace(inputFuncDecs);
+        });
     }
 
     return {

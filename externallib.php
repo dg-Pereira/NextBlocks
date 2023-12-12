@@ -39,10 +39,19 @@ class mod_nextblocks_external extends external_api {
 
     public static function submit_workspace($nextblocksid, $submitted_workspace, $codeString) {
         global $DB, $USER;
+
         $params = self::validate_parameters(self::submit_workspace_parameters(),
             array('nextblocksid' => $nextblocksid, 'submitted_workspace' => $submitted_workspace, 'codeString' => $codeString));
 
         $cm = get_coursemodule_from_id('nextblocks', $nextblocksid, 0, false, MUST_EXIST);
+
+        $fs = get_file_storage();
+        $filenamehash = get_filenamehash($cm->instance);
+
+        $tests_file = $fs->get_file_by_hash($filenamehash);
+        $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
+
+        $tests = json_decode($tests_file_contents, true);
 
         //check if record exists
         $record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
@@ -52,13 +61,55 @@ class mod_nextblocks_external extends external_api {
         } else {
             $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $submitted_workspace));
         }
-        $nextblocks = $DB->get_record('nextblocks', array('id' => $cm->instance));
 
+        $testsCount = count($tests);
+        $testsCorrectCount = self::run_tests_jobe($tests, $codeString);
+        $newGrade = $testsCorrectCount / $testsCount * 100;
+
+        $nextblocks = $DB->get_record('nextblocks', array('id' => $cm->instance));
         $grades = new stdClass();
         $grades->userid = $USER->id;
-        $grades->rawgrade = 98;
+        $grades->rawgrade = $newGrade;
 
-        /*
+        nextblocks_grade_item_update($nextblocks, $grades);
+    }
+
+    public static function run_tests_jobe($tests, $codeString) {
+        $testsCorrectCount = 0;
+        for ($i = 0; $i < count($tests); $i++) {
+            nextblocks_log("test5");
+            $test = $tests[$i];
+            $inputs = $test['inputs'];
+            $expected_output = $test['output'];
+            //json has arrays where there shouldn't be, as there is only one element, so the foreaches are necessary even though they look redundant
+            foreach($inputs as $key => $val) {
+                $inputName = "";
+                $input = "";
+                foreach($val as $inputName_ => $val1) {
+                    $inputName = $inputName_;
+                    $input = "";
+                    foreach($val1 as $key2 => $inputValue_) {
+                        $input = $inputValue_;
+                    }
+                }
+
+                // Get the indexes of the first and second parentheses of the last occurrence of the input function call
+                $firstParenIndex = strrpos($codeString, "input" . $inputName . "(");
+                $secondParenIndex = strpos($codeString, ")", $firstParenIndex);
+
+                //replace everything between the parentheses with the input
+                $codeString = substr_replace($codeString, $input, $firstParenIndex + strlen("input" . $inputName . "("), $secondParenIndex - $firstParenIndex - strlen("input" . $inputName . "("));
+            }
+
+            $test_output = self::run_test_jobe($codeString);
+            if ($test_output == $expected_output) {
+                $testsCorrectCount++;
+            }
+        }
+        return $testsCorrectCount;
+    }
+
+    /*
          * Make http request to localhost:4000/jobe/index.php/restapi/runs/ with the following json:
          * {
          *   "run_spec": {
@@ -73,7 +124,7 @@ class mod_nextblocks_external extends external_api {
          *
          * Run docker container first
          */
-
+    public static function run_test_jobe($codeString){
         $url = 'http://localhost:4000/jobe/index.php/restapi/runs/';
         $data = [
             "run_spec" => [
@@ -98,12 +149,8 @@ class mod_nextblocks_external extends external_api {
             /* Handle error */
         }
 
-        nextblocks_log($codeString . "\n" . $result . "\n");
-
         $result = json_decode($result, true);
-        $stdout = $result['stdout'];
-
-        nextblocks_grade_item_update($nextblocks, $grades);
+        return $result['stdout'];
     }
 
     public static function submit_workspace_parameters()
