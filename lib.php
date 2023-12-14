@@ -133,9 +133,17 @@ function nextblocks_grade_item_update($nextblocks, $grades=null): int {
         $params = array('itemname'=>$nextblocks->name);
     }
 
-    $params['gradetype'] = GRADE_TYPE_VALUE;
-    $params['grademax'] = 100;
-    $params['grademin'] = 0;
+    //from assign/lib.php
+    if ($nextblocks->grade > 0) {
+        $params['gradetype'] = GRADE_TYPE_VALUE;
+        $params['grademax']  = $nextblocks->grade;
+        $params['grademin']  = 0;
+    } else if ($nextblocks->grade < 0) {
+        $params['gradetype'] = GRADE_TYPE_SCALE;
+        $params['scaleid']   = -$nextblocks->grade;
+    } else {
+        $params['gradetype'] = GRADE_TYPE_NONE;
+    }
 
     if ($grades === 'reset') {
         $params['reset'] = true;

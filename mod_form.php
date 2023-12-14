@@ -84,10 +84,6 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
 
-        //<<------------------------------------------ Grading tab ------------------------------------------>>//
-
-        $mform->addElement('header', 'grading', get_string('nextblockscreategrading', 'mod_nextblocks'));
-
         //<<------------------------------------------ Tests tab ------------------------------------------>>//
 
         $mform->addElement('header', 'tests', get_string('nextblockscreatetests', 'mod_nextblocks'));
@@ -187,8 +183,25 @@ class mod_nextblocks_mod_form extends moodleform_mod {
             'header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks')
         );
 
-        // Add standard elements.
+        //<<------------------------------------------ Submissions tab ------------------------------------------>>//
+
+        $mform->addElement(
+            'header', 'submissions', get_string('nextblockscreatesubmissions', 'mod_nextblocks')
+        );
+
+        $mform->addElement(
+            'advcheckbox', 'multiplesubmissions', get_string('multiplesubmissions', 'mod_nextblocks'),
+        );
+        $mform->addElement('text', 'submissionsnumber', get_string('howmanysubmissions', 'mod_nextblocks'));
+        $mform->hideIf('submissionsnumber', 'multiplesubmissions', 'neq', 1);
+
+
+        //<<------------------------------------------ Grading tab ------------------------------------------>>//
+
+        $this->standard_grading_coursemodule_elements();
+
         $this->standard_coursemodule_elements();
+        $this->apply_admin_defaults();
 
         // Add standard buttons.
         $this->add_action_buttons();

@@ -45,14 +45,6 @@ class mod_nextblocks_external extends external_api {
 
         $cm = get_coursemodule_from_id('nextblocks', $nextblocksid, 0, false, MUST_EXIST);
 
-        $fs = get_file_storage();
-        $filenamehash = get_filenamehash($cm->instance);
-
-        $tests_file = $fs->get_file_by_hash($filenamehash);
-        $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
-
-        $tests = json_decode($tests_file_contents, true);
-
         //check if record exists
         $record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
         //if record exists with same userid and nextblocksid, update it, else insert new record
@@ -62,11 +54,29 @@ class mod_nextblocks_external extends external_api {
             $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $submitted_workspace));
         }
 
+        $nextblocks = $DB->get_record('nextblocks', array('id' => $cm->instance));
+
+        $fs = get_file_storage();
+        $filenamehash = get_filenamehash($cm->instance);
+
+        // if has point grade and tests, run auto grading
+        if($nextblocks->grade > 0 && $filenamehash != false) {
+            $tests_file = $fs->get_file_by_hash($filenamehash);
+            self::auto_grade($cm, $codeString, $nextblocks, $tests_file);
+        }
+    }
+
+    public static function auto_grade($cm, $codeString, $nextblocks, $tests_file) {
+        global $USER, $DB;
+
+        $tests_file_contents = $tests_file->get_content();
+
+        $tests = json_decode($tests_file_contents, true);
+
         $testsCount = count($tests);
         $testsCorrectCount = self::run_tests_jobe($tests, $codeString);
-        $newGrade = $testsCorrectCount / $testsCount * 100;
+        $newGrade = $testsCorrectCount / $testsCount * $nextblocks->grade; //$nextblocks->grade is the max grade
 
-        $nextblocks = $DB->get_record('nextblocks', array('id' => $cm->instance));
         $grades = new stdClass();
         $grades->userid = $USER->id;
         $grades->rawgrade = $newGrade;
@@ -74,10 +84,9 @@ class mod_nextblocks_external extends external_api {
         nextblocks_grade_item_update($nextblocks, $grades);
     }
 
-    public static function run_tests_jobe($tests, $codeString) {
+    public static function run_tests_jobe($tests, $codeString): int {
         $testsCorrectCount = 0;
         for ($i = 0; $i < count($tests); $i++) {
-            nextblocks_log("test5");
             $test = $tests[$i];
             $inputs = $test['inputs'];
             $expected_output = $test['output'];
@@ -93,7 +102,7 @@ class mod_nextblocks_external extends external_api {
                     }
                 }
 
-                // Get the indexes of the first and second parentheses of the last occurrence of the input function call
+                // Get the indices of the first and second parentheses of the last occurrence of the input function call
                 $firstParenIndex = strrpos($codeString, "input" . $inputName . "(");
                 $secondParenIndex = strpos($codeString, ")", $firstParenIndex);
 
@@ -102,6 +111,7 @@ class mod_nextblocks_external extends external_api {
             }
 
             $test_output = self::run_test_jobe($codeString);
+            nextblocks_log("test output: " . $test_output . " expected output: " . $expected_output);
             if ($test_output == $expected_output) {
                 $testsCorrectCount++;
             }
@@ -147,6 +157,7 @@ class mod_nextblocks_external extends external_api {
         $result = file_get_contents($url, false, $context);
         if ($result === false) {
             /* Handle error */
+
         }
 
         $result = json_decode($result, true);

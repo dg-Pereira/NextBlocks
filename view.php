@@ -86,7 +86,15 @@ $filenamehash = get_filenamehash($instanceid);
 
 $tests_file = $fs->get_file_by_hash($filenamehash);
 $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json]);
+
+//if has the record and has submitted workspace, disable workspace
+if ($record && $record->submitted_workspace){
+    $remaining_submissions = 0;
+} else {
+    $remaining_submissions = 1;
+}
+
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, $remaining_submissions]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));

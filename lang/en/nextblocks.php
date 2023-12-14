@@ -33,7 +33,7 @@ $string['nextblockssettings'] = 'NextBlocks settings';
 $string['nextblocksname'] = "Exercise name";
 $string['nextblocksname_help'] = "Name of the NextBlocks activity";
 $string['nextblockscreatetiming'] = "Timing";
-$string['nextblockscreategrading'] = "Grading";
+$string['nextblockscreategrading'] = "Grades";
 $string['nextblockscreatetests'] = "Tests";
 $string['nextblockscreatecustomblocks'] = "Custom Blocks";
 $string['nextblockscreateprimitiverestrictions'] = "Primitive Restrictions";
@@ -68,3 +68,13 @@ $string['blockgenerator_help'] = 'Custom block generator function. <br> Copy cod
 $string['customblockstext'] = '<p> Create a custom Blockly block. Intended for advanced users. <br> Please note that the custom block code is not validated in any way, so if the definition or the generator are not correct, the custom block will not work. <br> For help creating a custom block, visit <a target=”_blank” href="https://blockly-demo.appspot.com/static/demos/blockfactory/index.html">https://blockly-demo.appspot.com/static/demos/blockfactory/index.html</a> </p>';
 $string['addanothercustomblock'] = 'Add another custom block';
 $string['deletestr'] = 'Delete';
+$string['gradingselect'] = 'Grading method';
+$string['gradingselect0'] = 'None';
+$string['gradingselect1'] = 'Point';
+$string['gradingselect2'] = 'Scale';
+$string['gradingselect3'] = 'Feedback only';
+$string['maxgrade'] = 'Maximum grade';
+$string['nextblockscreatesubmissions'] = 'Submissions';
+$string['multiplesubmissions'] = 'Allow multiple submissions';
+$string['howmanysubmissions'] = 'How many submissions';
+

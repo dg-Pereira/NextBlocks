@@ -119,37 +119,6 @@ let toolbox = {
     ],
 };
 
-const options = {
-    toolbox: toolbox,
-    collapse: true,
-    comments: true,
-    disable: true,
-    maxBlocks: Infinity,
-    trashcan: true,
-    horizontalLayout: false,
-    toolboxPosition: 'start',
-    css: true,
-    media: 'https://blockly-demo.appspot.com/static/media/',
-    rtl: false,
-    scrollbars: true,
-    sounds: true,
-    oneBasedIndex: false,
-    grid: {
-        spacing: 20,
-        length: 1,
-        colour: '#888',
-        snap: false,
-    },
-    zoom: {
-        controls: true,
-        wheel: true,
-        startScale: 1,
-        maxScale: 3,
-        minScale: 0.3,
-        scaleSpeed: 1.2,
-    },
-};
-
 // GetMainWorkspace might remove need for global variable
 let nextblocksWorkspace;
 
@@ -185,6 +154,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         const stateB64 = btoa(JSON.stringify(state));
         const cmid = getCMID();
         repository.submitWorkspace(cmid, stateB64, codeString);
+        location.reload();
     };
 
     /**
@@ -245,8 +215,9 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          * @param {String} contents The contents of the tests file
          * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
          * @param {{}} customBlocks The custom blocks to be added to the toolbox, created by the exercise creator
+         * @param {Number} remainingSubmissions The number of remaining submissions for the current user
          */
-        init: function(contents, loadedSave, customBlocks) {
+        init: function(contents, loadedSave, customBlocks, remainingSubmissions) {
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
 
@@ -263,8 +234,6 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 });
             }
 
-            // eslint-disable-next-line no-console
-            console.log(customBlocks);
             customBlocks.forEach((block) => {
                 let splitTest = block.generator.split("forBlock['");
                 let dotCase = false;
@@ -288,7 +257,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 eval(block.generator);
             });
 
-            nextblocksWorkspace = Blockly.inject(blocklyDiv, options);
+            nextblocksWorkspace = Blockly.inject(blocklyDiv, getOptions(remainingSubmissions));
             javascript.javascriptGenerator.init(nextblocksWorkspace);
 
             // Use resize observer instead of window resize event. This captures both window resize and element resize
@@ -328,6 +297,40 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         }
     };
 });
+
+const getOptions = function(remainingSubmissions) {
+    return {
+        toolbox: toolbox,
+        collapse: true,
+        comments: true,
+        disable: true,
+        maxBlocks: Infinity,
+        trashcan: true,
+        horizontalLayout: false,
+        toolboxPosition: 'start',
+        css: true,
+        media: 'https://blockly-demo.appspot.com/static/media/',
+        rtl: false,
+        scrollbars: true,
+        sounds: true,
+        oneBasedIndex: false,
+        readOnly: remainingSubmissions <= 0,
+        grid: {
+            spacing: 20,
+            length: 1,
+            colour: '#888',
+            snap: false,
+        },
+        zoom: {
+            controls: true,
+            wheel: true,
+            startScale: 1,
+            maxScale: 3,
+            minScale: 0.3,
+            scaleSpeed: 1.2,
+        },
+    };
+};
 
 const onResize = function(blocklyArea, blocklyDiv, nextblocksWorkspace) {
     // Compute the absolute coordinates and dimensions of blocklyArea.
