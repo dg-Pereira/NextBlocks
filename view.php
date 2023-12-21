@@ -87,11 +87,10 @@ $filenamehash = get_filenamehash($instanceid);
 $tests_file = $fs->get_file_by_hash($filenamehash);
 $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
 
-//if has the record and has submitted workspace, disable workspace
-if ($record && $record->submitted_workspace){
-    $remaining_submissions = 0;
+if($record) {
+    $remaining_submissions = $moduleinstance->maxsubmissions - $record->submissionnumber;
 } else {
-    $remaining_submissions = 1;
+    $remaining_submissions = $moduleinstance->maxsubmissions;
 }
 
 $PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, $remaining_submissions]);

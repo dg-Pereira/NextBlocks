@@ -192,8 +192,8 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         $mform->addElement(
             'advcheckbox', 'multiplesubmissions', get_string('multiplesubmissions', 'mod_nextblocks'),
         );
-        $mform->addElement('text', 'submissionsnumber', get_string('howmanysubmissions', 'mod_nextblocks'));
-        $mform->hideIf('submissionsnumber', 'multiplesubmissions', 'neq', 1);
+        $mform->addElement('text', 'maxsubmissions', get_string('howmanysubmissions', 'mod_nextblocks'));
+        $mform->hideIf('maxsubmissions', 'multiplesubmissions', 'neq', 1);
 
 
         //<<------------------------------------------ Grading tab ------------------------------------------>>//

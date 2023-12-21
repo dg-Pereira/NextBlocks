@@ -49,9 +49,9 @@ class mod_nextblocks_external extends external_api {
         $record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
         //if record exists with same userid and nextblocksid, update it, else insert new record
         if ($record) {
-            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $submitted_workspace));
+            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'saved_workspace' => $submitted_workspace, 'submitted_workspace' => $submitted_workspace, 'submissionnumber' => $record->submissionnumber + 1));
         } else {
-            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance, 'submitted_workspace' => $submitted_workspace));
+            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance, 'saved_workspace' => $submitted_workspace, 'submitted_workspace' => $submitted_workspace, 'submissionnumber' => 1));
         }
 
         $nextblocks = $DB->get_record('nextblocks', array('id' => $cm->instance));
@@ -67,7 +67,7 @@ class mod_nextblocks_external extends external_api {
     }
 
     public static function auto_grade($cm, $codeString, $nextblocks, $tests_file) {
-        global $USER, $DB;
+        global $USER;
 
         $tests_file_contents = $tests_file->get_content();
 
