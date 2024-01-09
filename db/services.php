@@ -2,7 +2,7 @@
 
 $services = array(
     'mypluginservice' => array(                      //the name of the web service
-        'functions' => array ('mod_nextblocks_save_workspace', 'mod_nextblocks_load_workspace'), //web service functions of this service
+        'functions' => array ('mod_nextblocks_save_workspace', 'mod_nextblocks_submit_workspace'), //web service functions of this service
         'requiredcapability' => '',                //if set, the web service user need this capability to access
         //any function of this service. For example: 'some/capability:specified'
         'restrictedusers' => 0,                      //if enabled, the Moodle administrator must link some user to this service
@@ -22,13 +22,14 @@ $functions = array(
         'ajax' => true,
         'loginrequired' => true,
     ),
-    'mod_nextblocks_load_workspace' => array(
+
+    'mod_nextblocks_submit_workspace' => array(
         'classname' => 'mod_nextblocks_external',
-        'methodname' => 'load_workspace',
+        'methodname' => 'submit_workspace',
         'classpath' => 'mod/nextblocks/externallib.php',
-        'description' => 'Load saved workspace',
-        'type' => 'read',
+        'description' => 'Submit current workspace',
+        'type' => 'write',
         'ajax' => true,
         'loginrequired' => true,
-    )
+    ),
 );

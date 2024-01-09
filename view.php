@@ -67,7 +67,7 @@ $cm = get_coursemodule_from_id('nextblocks', $cmid, 0, false, MUST_EXIST);
 $instanceid = $cm->instance;
 
 // call init, with saved workspace and tests file if they exist
-$record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cmid));
+$record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
 $saved_workspace = $record ? $record->saved_workspace : null;
 
 // get custom blocks
@@ -86,7 +86,14 @@ $filenamehash = get_filenamehash($instanceid);
 
 $tests_file = $fs->get_file_by_hash($filenamehash);
 $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json]);
+
+if($record) {
+    $remaining_submissions = $moduleinstance->maxsubmissions - $record->submissionnumber;
+} else {
+    $remaining_submissions = $moduleinstance->maxsubmissions;
+}
+
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, $remaining_submissions]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
@@ -198,8 +205,8 @@ if($filenamehash != false){
 echo '<div style="text-align: center;">';
 
 echo '<input id="saveButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_save", "nextblocks").'" />';
-echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
-echo '<input type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';
+echo '<input id="submitButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
+echo '<input id="cancelButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';
 
 echo '</div>';
 

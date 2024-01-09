@@ -21,7 +21,6 @@ function input(prompt) {
         static #codeEnding = `return outputString;
 })();
 `;
-
         constructor(codeString) {
             if (arguments.length > 0) {
                 this.#codeString = codeString;
@@ -48,6 +47,13 @@ function input(prompt) {
             const startCodeLines = codeLines.slice(startIndex, endIndex);
 
             return functionLines.concat(startCodeLines).join('\n');
+        }
+
+        getSubmittableCodeString() {
+            //replace return outputString; with process.stdout.write(outputString);
+            let lastIndex = this.#codeString.lastIndexOf('return outputString;');
+            return this.#codeString.substring(0, lastIndex) + 'process.stdout.write(outputString);' +
+                this.#codeString.substring(lastIndex + 'return outputString;'.length);
         }
 
         addVariable(variableName, variableValue) {

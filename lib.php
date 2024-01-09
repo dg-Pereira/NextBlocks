@@ -35,6 +35,8 @@ function nextblocks_supports(string $feature): ?bool {
     switch ($feature) {
     case FEATURE_MOD_INTRO:
         return true;
+    case FEATURE_GRADE_HAS_GRADE:
+        return true;
     default:
         return null;
     }
@@ -92,6 +94,9 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
             //save hash of the file in the database for later file retrieval
             save_tests_file_hash($id);
         }
+
+        $record = $DB->get_record('nextblocks', array('id' => $id));
+        nextblocks_grade_item_update($record);
     } else {
         // This branch is executed if the form is submitted but the data doesn't
         // validate and the form should be redisplayed or on the first display of the form.
@@ -105,6 +110,59 @@ function nextblocks_add_instance(object $moduleinstance, mod_nextblocks_mod_form
     }
 
     return $id;
+}
+
+function nextblocks_update_grades($nextblocks, $userid=0, $nullifnone=true) {
+    global $CFG, $DB;
+    require_once($CFG->libdir.'/gradelib.php');
+
+    nextblocks_grade_item_update($nextblocks);
+    // Updating user's grades is not supported at this time in the logic module.
+    return;
+}
+
+function nextblocks_grade_item_update($nextblocks, $grades=null): int {
+    global $CFG;
+    if (!function_exists('grade_update')) { //workaround for buggy PHP versions
+        require_once($CFG->libdir.'/gradelib.php');
+    }
+
+    if (property_exists($nextblocks, 'cm_id')) { //it may not be always present
+        $params = array('itemname'=>$nextblocks->name, 'idnumber'=>$nextblocks->cm_id);
+    } else {
+        $params = array('itemname'=>$nextblocks->name);
+    }
+
+    //from assign/lib.php
+    if ($nextblocks->grade > 0) {
+        $params['gradetype'] = GRADE_TYPE_VALUE;
+        $params['grademax']  = $nextblocks->grade;
+        $params['grademin']  = 0;
+    } else if ($nextblocks->grade < 0) {
+        $params['gradetype'] = GRADE_TYPE_SCALE;
+        $params['scaleid']   = -$nextblocks->grade;
+    } else {
+        $params['gradetype'] = GRADE_TYPE_NONE;
+    }
+
+    if ($grades === 'reset') {
+        $params['reset'] = true;
+        $grades = null;
+    } else if (!empty($grades)) {
+        // Need to calculate raw grade (Note: $grades has many forms)
+        if (is_object($grades)) {
+            $grades = array($grades->userid => $grades);
+        } else if (array_key_exists('userid', $grades)){
+            $grades = array($grades['userid'] => $grades);
+        }
+        foreach ($grades as $key => $grade) {
+            if (!is_array($grade)) {
+                $grades[$key] = (array) $grade;
+            }
+        }
+    }
+
+    return grade_update('mod/nextblocks', $nextblocks->course, 'mod', 'nextblocks', $nextblocks->id, 0, $grades, $params);
 }
 
 /**

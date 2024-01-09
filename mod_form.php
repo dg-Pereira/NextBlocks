@@ -84,23 +84,9 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
 
-        //<<------------------------------------------ Grading tab ------------------------------------------>>//
-
-        $mform->addElement('header', 'grading', get_string('nextblockscreategrading', 'mod_nextblocks'));
-
         //<<------------------------------------------ Tests tab ------------------------------------------>>//
 
         $mform->addElement('header', 'tests', get_string('nextblockscreatetests', 'mod_nextblocks'));
-        //$mform->setExpanded('tests', true);
-
-        $radioarray=array();
-        $radioarray[] = $mform->createElement('radio', 'testsradio', '', get_string('testsradiofile', 'mod_nextblocks'), 1, '');
-        $radioarray[] = $mform->createElement('radio', 'testsradio', '', get_string('testsradiotextbox', 'mod_nextblocks'), 2, '');
-        $mform->addGroup($radioarray, 'testsradio', get_string('testsradiolabel', 'mod_nextblocks'), '<br>', false);
-        $mform->addHelpButton('testsradio', 'testsradio', 'mod_nextblocks');
-        $mform->setDefault('testsradio', 1); //both unselected
-
-        // File option
 
         $mform->addElement(
             'filemanager',
@@ -115,20 +101,8 @@ class mod_nextblocks_mod_form extends moodleform_mod {
                 'return_types' => FILE_INTERNAL | FILE_EXTERNAL,
             ]
         );
-        $mform->addHelpButton('testsfile', 'testsfile', 'mod_nextblocks');
+        $mform->addHelpButton('attachments', 'testsfile', 'mod_nextblocks');
         $mform->setType('testsfile', PARAM_FILE);
-        $mform->hideIf('testsfile', 'testsradio', 'neq', 1);
-
-        // Text boxes option
-        $mform->addElement('text', 'testsinput', get_string('testsinput', 'mod_nextblocks'));
-        $mform->addHelpButton('testsinput', 'testsinput', 'mod_nextblocks');
-        $mform->setType('testsinput', PARAM_TEXT);
-        $mform->hideIf('testsinput', 'testsradio', 'neq', 2);
-
-        $mform->addElement('text', 'testsoutput', get_string('testsoutput', 'mod_nextblocks'));
-        $mform->addHelpButton('testsoutput', 'testsoutput', 'mod_nextblocks');
-        $mform->setType('testsoutput', PARAM_TEXT);
-        $mform->hideIf('testsoutput', 'testsradio', 'neq', 2);
 
         //<<------------------------------------------ Custom Blocks tab ------------------------------------------>>//
 
@@ -187,8 +161,26 @@ class mod_nextblocks_mod_form extends moodleform_mod {
             'header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks')
         );
 
-        // Add standard elements.
+        //<<------------------------------------------ Submissions tab ------------------------------------------>>//
+
+        $mform->addElement(
+            'header', 'submissions', get_string('nextblockscreatesubmissions', 'mod_nextblocks')
+        );
+
+        $mform->addElement(
+            'advcheckbox', 'multiplesubmissions', get_string('multiplesubmissions', 'mod_nextblocks'),
+        );
+        $mform->addElement('text', 'maxsubmissions', get_string('howmanysubmissions', 'mod_nextblocks'));
+        $mform->setType('maxsubmissions', PARAM_INT);
+        $mform->hideIf('maxsubmissions', 'multiplesubmissions', 'neq', 1);
+
+
+        //<<------------------------------------------ Grading tab ------------------------------------------>>//
+
+        $this->standard_grading_coursemodule_elements();
+
         $this->standard_coursemodule_elements();
+        $this->apply_admin_defaults();
 
         // Add standard buttons.
         $this->add_action_buttons();
