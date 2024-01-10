@@ -179,4 +179,34 @@ class mod_nextblocks_external extends external_api {
         return null;
     }
 
+    public static function submit_reaction($nextblocksid, $reaction) {
+        global $DB, $USER;
+        $params = self::validate_parameters(self::submit_workspace_parameters(),
+            array('nextblocksid' => $nextblocksid, 'reaction' => $reaction));
+
+        $cm = get_coursemodule_from_id('nextblocks', $nextblocksid, 0, false, MUST_EXIST);
+
+        //get column name from reaction
+        $reactionColumnName = "reactions".$reaction;
+
+        //get record
+        $record = $DB->get_record('nextblocks', array('nextblocksid' => $cm->instance));
+
+        //increment reaction
+        $DB->update_record('nextblocks', array('id' => $record->id, $reactionColumnName => $record->$reactionColumnName + 1));
+    }
+
+    public static function submit_reaction_parameters()
+    {
+        return new external_function_parameters(
+            array(
+                'nextblocksid' => new external_value(PARAM_INT, 'module id'),
+                'reaction' => new external_value(PARAM_ALPHA, 'workspace'),
+            )
+        );
+    }
+
+    public static function submit_reaction_returns() {
+        return null;
+    }
 }

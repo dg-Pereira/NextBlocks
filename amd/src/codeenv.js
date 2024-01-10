@@ -172,8 +172,9 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
      * @param {{}} tests The tests to be run
      * @param {WorkspaceSvg} workspace The workspace to get the code from
      * @param {string} inputFuncDecs
+     * @param {String[]} reactions The number of reactions of each type
      */
-    function setupButtons(tests, workspace, inputFuncDecs) {
+    function setupButtons(tests, workspace, inputFuncDecs, reactions) {
         // Listen for clicks on the run button
         const runButton = document.getElementById('runButton');
         runButton.addEventListener('click', function() {
@@ -208,6 +209,16 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         submitButton.addEventListener('click', () => {
             submitWorkspace(inputFuncDecs);
         });
+
+        const imgs = document.getElementsByClassName("emoji-img");
+        // eslint-disable-next-line no-console
+        console.log(imgs);
+        Array.from(imgs).forEach((img) => {
+            img.addEventListener("click", () => {
+                updatePercentages(reactions[0], reactions[1], reactions[2], img.alt);
+                repository.submitReaction(getCMID(), img.alt); // Check img.alt when event works
+            });
+        });
     }
 
     return {
@@ -216,8 +227,12 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
          * @param {{}} customBlocks The custom blocks to be added to the toolbox, created by the exercise creator
          * @param {Number} remainingSubmissions The number of remaining submissions for the current user
+         * @param {String[]} reactions An array of 3 strings, each containing the number of reactions of a certain type
+         * (easy, medium, hard)
          */
-        init: function(contents, loadedSave, customBlocks, remainingSubmissions) {
+        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions) {
+            updatePercentages(reactions[0], reactions[1], reactions[2]);
+
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
 
@@ -293,10 +308,43 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 addBlockToWorkspace('start', nextblocksWorkspace);
             }
 
-            setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
-        }
+            setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, reactions);
+        },
     };
 });
+
+const updatePercentages = function(easy, medium, hard, inc = "") {
+    const easyDiv = document.getElementById('percentage-easy');
+    const mediumDiv = document.getElementById('percentage-medium');
+    const hardDiv = document.getElementById('percentage-hard');
+
+    if (inc === "easy") {
+        easy++;
+    } else if (inc === "medium") {
+        medium++;
+    } else if (inc === "hard") {
+        hard++;
+    }
+
+    let percentages = calcPercentages(easy, medium, hard);
+
+    easyDiv.innerHTML = percentages[0] + '%';
+    mediumDiv.innerHTML = percentages[1] + '%';
+    hardDiv.innerHTML = percentages[2] + '%';
+};
+
+const calcPercentages = function(easy, medium, hard) {
+    // eslint-disable-next-line no-console
+    console.log(easy, medium, hard);
+    const total = easy + medium + hard;
+    if (total === 0) {
+        return [0, 0, 0];
+    }
+    const easyPercentage = Math.round((easy / total) * 100);
+    const mediumPercentag = Math.round((medium / total) * 100);
+    const hardPercentag = Math.round((hard / total) * 100);
+    return [easyPercentage, mediumPercentag, hardPercentag];
+};
 
 const getOptions = function(remainingSubmissions) {
     return {

@@ -35,10 +35,6 @@
     position: absolute;
 }
 
-img {
-    pointer-events: none;
-}
-
 #nextblocks-container {
     height: 70vh;
 }
