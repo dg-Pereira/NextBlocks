@@ -94,8 +94,9 @@ if($record) {
 }
 
 $reactions = [intval($moduleinstance->reactionseasy), intval($moduleinstance->reactionsmedium), intval($moduleinstance->reactionshard)];
+$last_user_reaction = $record ? intval($record->reacted) : 0;
 
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, $remaining_submissions, $reactions]);
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, $remaining_submissions, $reactions, $last_user_reaction]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
@@ -135,21 +136,21 @@ echo '<div id="nextblocks-container" class="container-fluid mt-6 mb-6">
                         <!-- three emoji reactions -->
                         <div class="col-md-4 h-100">
                             <div class="row h-75">
-                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded mh-100" src="pix/emoji-hard.png" alt="Dummy laugh image" role="button">
+                                <img id="emoji-hard" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary rounded mh-100" src="pix/emoji-hard.png" alt="Dummy laugh image" role="button">
                             </div>
-                            <div id="percentage-easy" class="col-md-12 text-center"></div>
+                            <div id="percentage-hard" class="col-md-12 text-center"></div>
                         </div>
                         <div class="col-md-4 h-100">
                             <div class="row h-75">
-                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded mh-100" src="pix/emoji-think.png" alt="Dummy laugh image">
+                                <img id="emoji-medium" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary rounded mh-100" src="pix/emoji-think.png" alt="Dummy laugh image">
                             </div>
                             <div id="percentage-medium" class="col-md-12 text-center"></div>
                         </div>
                         <div class="col-md-4 h-100">
                             <div class="row h-75">
-                                <img class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-gray rounded mh-100" src="pix/emoji-easy.png" alt="Dummy laugh image">
+                                <img id="emoji-easy" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary bg-primary rounded mh-100" src="pix/emoji-easy.png" alt="Dummy laugh image">
                             </div>
-                            <div id="percentage-hard" class="col-md-12 text-center"></div>
+                            <div id="percentage-easy" class="col-md-12 text-center"></div>
                         </div>
                     </div>
                 </div>

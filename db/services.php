@@ -42,6 +42,4 @@ $functions = array(
         'ajax' => true,
         'loginrequired' => true,
     ),
-
-    //remember to reinstall plugin when event works!
 );

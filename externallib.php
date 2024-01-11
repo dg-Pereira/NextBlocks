@@ -181,19 +181,55 @@ class mod_nextblocks_external extends external_api {
 
     public static function submit_reaction($nextblocksid, $reaction) {
         global $DB, $USER;
-        $params = self::validate_parameters(self::submit_workspace_parameters(),
+        $params = self::validate_parameters(self::submit_reaction_parameters(),
             array('nextblocksid' => $nextblocksid, 'reaction' => $reaction));
 
         $cm = get_coursemodule_from_id('nextblocks', $nextblocksid, 0, false, MUST_EXIST);
+        $nextblocks = $DB->get_record('nextblocks', array('id' => $cm->instance));
+        $userdata = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
+        //if userdata does not exist, insert new record
+        if (!$userdata) {
+            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
+        }
 
-        //get column name from reaction
-        $reactionColumnName = "reactions".$reaction;
+        //get reaction database column name
+        $newReactionColumnName = "reactions".$reaction;
+        //reaction to number, for database (easy-1, medium-2, hard-3)
+        $newReactionNumber = array_search($reaction, array('easy', 'medium', 'hard')) + 1;
 
-        //get record
-        $record = $DB->get_record('nextblocks', array('nextblocksid' => $cm->instance));
+        $new_reactions = [
+            'reactionseasy' => $nextblocks->reactionseasy,
+            'reactionsmedium' => $nextblocks->reactionsmedium,
+            'reactionshard' => $nextblocks->reactionshard,];
 
-        //increment reaction
-        $DB->update_record('nextblocks', array('id' => $record->id, $reactionColumnName => $record->$reactionColumnName + 1));
+        // if new reaction is same as previous reaction, decrement reaction
+        if ($userdata->reacted == $newReactionNumber) {
+            $DB->update_record('nextblocks', array('id' => $nextblocks->id, $newReactionColumnName => $nextblocks->$newReactionColumnName - 1));
+            //user unreacted, update userdata
+            $DB->update_record('nextblocks_userdata', array('id' => $userdata->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'reacted' => 0));
+            $new_reactions[$newReactionColumnName] = $nextblocks->$newReactionColumnName - 1;
+        } else { // else, decrement previous reaction (if it exists) and increment new reaction.
+            if ($userdata->reacted == 0) {
+                $DB->update_record('nextblocks', array('id' => $nextblocks->id, $newReactionColumnName => $nextblocks->$newReactionColumnName + 1));
+                $new_reactions[$newReactionColumnName] = $nextblocks->$newReactionColumnName + 1;
+            } else {
+                $oldReactionColumnName = "reactions" . array('easy', 'medium', 'hard')[$userdata->reacted - 1];
+
+                $DB->update_record(
+                    'nextblocks', array(
+                        'id' => $nextblocks->id,
+                        $newReactionColumnName => $nextblocks->$newReactionColumnName + 1,
+                        $oldReactionColumnName => $nextblocks->$oldReactionColumnName - 1
+                    )
+                );
+                $new_reactions[$newReactionColumnName] = $nextblocks->$newReactionColumnName + 1;
+                $new_reactions[$oldReactionColumnName] = $nextblocks->$oldReactionColumnName - 1;
+            }
+            //update userdata with new reaction
+            $DB->update_record('nextblocks_userdata', array('id' => $userdata->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'reacted' => $newReactionNumber));
+        }
+
+        return $new_reactions;
     }
 
     public static function submit_reaction_parameters()
@@ -207,6 +243,12 @@ class mod_nextblocks_external extends external_api {
     }
 
     public static function submit_reaction_returns() {
-        return null;
+        return new external_single_structure(
+            array(
+                'reactionseasy' => new external_value(PARAM_INT, 'number of easy reactions'),
+                'reactionsmedium' => new external_value(PARAM_INT, 'number of medium reactions'),
+                'reactionshard' => new external_value(PARAM_INT, 'number of hard reactions'),
+            )
+        );
     }
 }
