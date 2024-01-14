@@ -199,7 +199,7 @@ function hasTestsFile(object $fromform): bool
 
 function file_structure_is_valid(string $file_string): bool {
     // Validate file structure with regular expression
-    $exp = "/(\|\s+(_\s+\w+\s+(\w+\s+)+)*-\s+(\w+\s+)+)+/";
+    $exp = "/(\|\s+(_\s+\w+\s*:\s*(\w+\s+)+)*-\s+(\w+\s+)+)+/";
     return preg_match_all($exp, $file_string) !== 1;
 }
 
@@ -323,17 +323,22 @@ function parse_tests_file(String $fileString): array
                 if (strlen($input) < 3) { // Skip junk elements
                     continue;
                 }
-                // Each input has multiple lines. The first line is the input name, the prompt, and the rest are
+                // Each input has multiple lines. The first line is the input name and type, and the rest are
                 // the input values for that input
                 $inputLines = array_map('trim', explode("\n", $input)); // Remove junk line breaks from every line
                 array_shift($inputLines); // Remove the first line (junk)
                 array_pop($inputLines); // Remove the last line (junk)
 
+                $inputName = explode(":", $inputLines[0])[0]; // Get the name of the input
+                $inputType = trim(explode(":", $inputLines[0])[1]); // Get the type of the input
+
+                $inputValue = [];
+                $inputValue[$inputType] = array_slice($inputLines, 1); // Get the input values, skipping the first line
+
                 // Contains the input prompt and a list of input values
-                $thisInputJson = [$inputLines[0] => array_slice($inputLines, 1)];
+                $thisInputJson = [$inputName => $inputValue];
                 $thisTestCaseJson['inputs'][] = $thisInputJson; // Add this input to the list of inputs of this test case
             }
-
             $jsonReturn[] = $thisTestCaseJson; // Add this test case to the list of test cases
         }
         return $jsonReturn;

@@ -264,6 +264,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          */
         init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction) {
 
+            // eslint-disable-next-line no-console
+            console.log(contents);
             updatePercentages(reactions[0], reactions[1], reactions[2]);
 
             const blocklyDiv = document.getElementById('blocklyDiv');
@@ -312,7 +314,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             const resizeObserver = new ResizeObserver(() => onResize(blocklyArea, blocklyDiv, nextblocksWorkspace));
             resizeObserver.observe(blocklyArea);
 
-            // Parse json from contents
+            // Parse json from test file contents
             const tests = JSON.parse(contents);
             let inputFunctionDeclarations = {funcDecs: ""};
 

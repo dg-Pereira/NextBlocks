@@ -50,7 +50,7 @@ function input(prompt) {
         }
 
         getSubmittableCodeString() {
-            //replace return outputString; with process.stdout.write(outputString);
+            // Replace return outputString; with process.stdout.write(outputString);
             let lastIndex = this.#codeString.lastIndexOf('return outputString;');
             return this.#codeString.substring(0, lastIndex) + 'process.stdout.write(outputString);' +
                 this.#codeString.substring(lastIndex + 'return outputString;'.length);

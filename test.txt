@@ -1,36 +1,36 @@
 |
 _
-Number1
+Number1: number
 2
 _
-Number2
+Number2: number
 10
 -
 20
 |
 _
-Number1
+Number1: number
 4
 _
-Number2
+Number2: number
 10
 -
 40
 |
 _
-Number1
+Number1: number
 40
 _
-Number2
+Number2: number
 100
 -
 4000
 |
 _
-Number1
+Number1: number
 0
 _
-Number2
+Number2: number
 0
 -
 0
