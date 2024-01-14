@@ -108,6 +108,10 @@ let toolbox = {
             'contents': [
                 {
                     'kind': 'block',
+                    'type': 'number_input',
+                },
+                {
+                    'kind': 'block',
                     'type': 'text_input',
                 },
                 {
@@ -210,7 +214,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             submitWorkspace(inputFuncDecs);
         });
 
-        //convert the lastUserReaction to a string
+        // Convert the lastUserReaction to a string
         let lastUserReactionString = "";
         if (lastUserReaction === 1) {
             lastUserReactionString = "easy";
@@ -527,6 +531,18 @@ javascript.javascriptGenerator.forBlock.text_print = function(block, generator) 
     );
 };
 
+Blockly.Blocks.number_input = {
+    init: function() {
+        this.appendDummyInput()
+        .appendField("number input")
+        .appendField(new Blockly.FieldNumber(0), "number_input");
+        this.setOutput(true, "Number");
+        this.setColour(180);
+        this.setTooltip("");
+        this.setHelpUrl("");
+    }
+};
+
 Blockly.Blocks.text_input = {
     init: function() {
         this.appendDummyInput()
@@ -567,10 +583,15 @@ Blockly.Blocks.start = {
 
 // eslint-disable-next-line no-unused-vars
 javascript.javascriptGenerator.forBlock.start = function(block, generator) {
+    return '';
+};
+
+// eslint-disable-next-line no-unused-vars
+javascript.javascriptGenerator.forBlock.number_input = function(block, generator) {
     // TODO: Assemble javascript into code variable.
-    // get all blocks attached to this block
-    let code = '';
-    return code;
+    const number = block.getFieldValue('number_input');
+    let code = 'input("' + number + '")';
+    return [code, Blockly.JavaScript.ORDER_NONE];
 };
 
 // eslint-disable-next-line no-unused-vars
