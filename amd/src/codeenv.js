@@ -172,8 +172,9 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
      * @param {{}} tests The tests to be run
      * @param {WorkspaceSvg} workspace The workspace to get the code from
      * @param {string} inputFuncDecs
+     * @param {Number} lastUserReaction The type of reaction the current user last submitted
      */
-    function setupButtons(tests, workspace, inputFuncDecs) {
+    function setupButtons(tests, workspace, inputFuncDecs, lastUserReaction) {
         // Listen for clicks on the run button
         const runButton = document.getElementById('runButton');
         runButton.addEventListener('click', function() {
@@ -208,16 +209,59 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         submitButton.addEventListener('click', () => {
             submitWorkspace(inputFuncDecs);
         });
+
+        //convert the lastUserReaction to a string
+        let lastUserReactionString = "";
+        if (lastUserReaction === 1) {
+            lastUserReactionString = "easy";
+        } else if (lastUserReaction === 2) {
+            lastUserReactionString = "medium";
+        } else if (lastUserReaction === 3) {
+            lastUserReactionString = "hard";
+        }
+
+        const imgs = document.getElementsByClassName("emoji-img");
+        Array.from(imgs).forEach((img) => {
+            let imageType = '';
+            if (img.src.includes("easy")) {
+                imageType = "easy";
+            } else if (img.src.includes("think")) {
+                imageType = "medium";
+            } else if (img.src.includes("hard")) {
+                imageType = "hard";
+            }
+
+            // Start with one image selected if the user has already reacted in a previous session
+            if (lastUserReactionString === imageType) {
+                changeImageBackground(img);
+            }
+
+            img.addEventListener("click", () => {
+                // Submit reaction, and wait for response with new reaction counts
+                const newReactionsPromise = repository.submitReaction(getCMID(), imageType);
+                newReactionsPromise.then((newReactions) => {
+                    updatePercentages(newReactions.reactionseasy, newReactions.reactionsmedium, newReactions.reactionshard);
+                    changeImageBackground(img);
+                });
+            });
+        });
     }
 
     return {
         /**
-         * @param {String} contents The contents of the tests file
-         * @param {String} loadedSave The contents of the loaded save, in a base64-encoded JSON string
+         * @param {string} contents The contents of the tests file
+         * @param {string} loadedSave The contents of the loaded save, in a base64-encoded JSON string
          * @param {{}} customBlocks The custom blocks to be added to the toolbox, created by the exercise creator
-         * @param {Number} remainingSubmissions The number of remaining submissions for the current user
+         * @param {number} remainingSubmissions The number of remaining submissions for the current user
+         * @param {string[]} reactions An array of 3 strings, each containing the number of reactions of a certain type
+         * (easy, medium, hard)
+         * @param {number} lastUserReaction The type of reaction the current user last submitted
+         * (0 = no reaction, 1 = easy, 2 = medium, 3 = hard)
          */
-        init: function(contents, loadedSave, customBlocks, remainingSubmissions) {
+        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction) {
+
+            updatePercentages(reactions[0], reactions[1], reactions[2]);
+
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
 
@@ -293,10 +337,62 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 addBlockToWorkspace('start', nextblocksWorkspace);
             }
 
-            setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs);
-        }
+            setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction);
+        },
     };
 });
+
+// Makes background of image blue if it is not blue, and vice versa
+const changeImageBackground = function(img) {
+    // Change background of all other images to secondary
+    const imgs = document.getElementsByClassName("emoji-img");
+    Array.from(imgs).forEach((otherImg) => {
+        if (otherImg !== img) {
+            otherImg.classList.remove("bg-primary");
+            otherImg.classList.add("bg-secondary");
+        }
+    });
+
+    // Toggle background of clicked image
+    if (img.classList.contains("bg-primary")) {
+        img.classList.remove("bg-primary");
+        img.classList.add("bg-secondary");
+    } else {
+        img.classList.remove("bg-secondary");
+        img.classList.add("bg-primary");
+    }
+};
+
+const updatePercentages = function(easy, medium, hard, inc = "") {
+    const easyDiv = document.getElementById('percentage-easy');
+    const mediumDiv = document.getElementById('percentage-medium');
+    const hardDiv = document.getElementById('percentage-hard');
+
+    if (inc === "easy") {
+        easy++;
+    } else if (inc === "medium") {
+        medium++;
+    } else if (inc === "hard") {
+        hard++;
+    }
+
+    let percentages = calcPercentages(easy, medium, hard);
+
+    easyDiv.innerHTML = percentages[0] + '%';
+    mediumDiv.innerHTML = percentages[1] + '%';
+    hardDiv.innerHTML = percentages[2] + '%';
+};
+
+const calcPercentages = function(easy, medium, hard) {
+    const total = easy + medium + hard;
+    if (total === 0) {
+        return [0, 0, 0];
+    }
+    const easyPercentage = Math.round((easy / total) * 100);
+    const mediumPercentag = Math.round((medium / total) * 100);
+    const hardPercentag = Math.round((hard / total) * 100);
+    return [easyPercentage, mediumPercentag, hardPercentag];
+};
 
 const getOptions = function(remainingSubmissions) {
     return {

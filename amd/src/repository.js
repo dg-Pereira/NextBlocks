@@ -28,5 +28,15 @@ define(['core/ajax'], function(ajax) {
                 },
             }])[0];
         },
+
+        submitReaction: function(nextblocksid, reaction) {
+            return ajax.call([{
+                methodname: 'mod_nextblocks_submit_reaction',
+                args: {
+                    nextblocksid: nextblocksid,
+                    reaction: reaction,
+                },
+            }])[0];
+        }
     };
 });
