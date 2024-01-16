@@ -325,7 +325,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
                 inputs.forEach((input, i) => {
                     const inputName = Object.keys(input)[0];
-                    createForcedInputBlock(inputName, inputFunctionDeclarations); // Doesn't add block to workspace, just
+                    const inputType = Object.keys(input[inputName])[0];
+                    createForcedInputBlock(inputName, inputType, inputFunctionDeclarations); // Doesn't add block to workspace, just
                                                                                   // defines it. Needed for save loading
 
                     if (loadedSave === null) { // Only add to workspace if there is no workspace to load
@@ -484,33 +485,55 @@ function getCMID() {
 
 /**
  * @param {string} prompt The name of the input block to be added (prompt on the left side of the block)
+ * @param {string} inputType The type of the input block to be added (string, number, etc.)
  * @param {object} inputFunctionDeclarations Contains the string containing the function declarations for the input
  * blocks, to be added to the top of the code. Is an object so that it is passed by reference.
  */
-function createForcedInputBlock(prompt, inputFunctionDeclarations) {
+function createForcedInputBlock(prompt, inputType, inputFunctionDeclarations) {
     const blockName = "forced_input_" + prompt;
-    Blockly.Blocks[blockName] = {
-        init: function() {
-            this.appendDummyInput()
+    if (inputType === "string") {
+        Blockly.Blocks[blockName] = {
+            init: function() {
+                this.appendDummyInput()
+                    .appendField(prompt)
+                    .appendField(new Blockly.FieldTextInput('text'), prompt);
+                this.setOutput(true, "String");
+                this.setDeletable(false);
+                this.setColour(180);
+                this.setTooltip("");
+                this.setHelpUrl("");
+            }
+        };
+
+        // eslint-disable-next-line no-unused-vars
+        javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
+            const text = block.getFieldValue(prompt);
+            let blockCode = `input${prompt}('${text}')`;
+            return [blockCode, Blockly.JavaScript.ORDER_NONE];
+        };
+    } else if(inputType === "number") {
+        Blockly.Blocks[blockName] = {
+            init: function() {
+                this.appendDummyInput()
                 .appendField(prompt)
-                .appendField(new Blockly.FieldTextInput('text'), prompt);
-            this.setOutput(true, "String");
-            this.setDeletable(false);
-            this.setColour(180);
-            this.setTooltip("");
-            this.setHelpUrl("");
-        }
-    };
+                .appendField(new Blockly.FieldNumber(0), "number_input");
+                this.setOutput(true, "Number");
+                this.setColour(180);
+                this.setTooltip("");
+                this.setHelpUrl("");
+            }
+        };
+
+        // eslint-disable-next-line no-unused-vars
+        javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
+            const number = block.getFieldValue('number_input');
+            let blockCode = 'input(' + number + ')';
+            return [blockCode, Blockly.JavaScript.ORDER_NONE];
+        };
+    }
 
     inputFunctionDeclarations.funcDecs += `function input${prompt}(string) {\n   return string;\n}\n`;
     javascript.javascriptGenerator.addReservedWords(`input${prompt}`);
-
-    // eslint-disable-next-line no-unused-vars
-    javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
-        const text = block.getFieldValue(prompt);
-        let blockCode = `input${prompt}('${text}')`;
-        return [blockCode, Blockly.JavaScript.ORDER_NONE];
-    };
 }
 
 // eslint-disable-next-line no-extend-native
