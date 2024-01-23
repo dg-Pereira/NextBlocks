@@ -77,12 +77,8 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         //isEval checkbox
         //if second parameter of addElement is a colunm name of the table, the value of the checkbox will be saved in that column
-        $mform->addElement('advcheckbox', 'iseval', get_string('iseval', 'mod_nextblocks'));
-        $mform->addHelpButton('iseval', 'iseval', 'mod_nextblocks');
-
-        //<<------------------------------------------ Timing tab ------------------------------------------>>//
-
-        $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
+        //$mform->addElement('advcheckbox', 'iseval', get_string('iseval', 'mod_nextblocks'));
+        //$mform->addHelpButton('iseval', 'iseval', 'mod_nextblocks');
 
         //<<------------------------------------------ Tests tab ------------------------------------------>>//
 
@@ -160,6 +156,10 @@ class mod_nextblocks_mod_form extends moodleform_mod {
         $mform->addElement(
             'header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks')
         );
+
+        //<<------------------------------------------ Timing tab ------------------------------------------>>//
+
+        $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
 
         //<<------------------------------------------ Submissions tab ------------------------------------------>>//
 

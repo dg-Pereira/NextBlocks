@@ -189,7 +189,8 @@ class mod_nextblocks_external extends external_api {
         $userdata = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
         //if userdata does not exist, insert new record
         if (!$userdata) {
-            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
+            $new_id = $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
+            $userdata = $DB->get_record('nextblocks_userdata', array('id' => $new_id));
         }
 
         //get reaction database column name

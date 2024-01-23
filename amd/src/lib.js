@@ -234,4 +234,3 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
         },
     };
 });
-

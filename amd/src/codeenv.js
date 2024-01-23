@@ -210,7 +210,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             submitWorkspace(inputFuncDecs);
         });
 
-        //convert the lastUserReaction to a string
+        // Convert the lastUserReaction to a string
         let lastUserReactionString = "";
         if (lastUserReaction === 1) {
             lastUserReactionString = "easy";
