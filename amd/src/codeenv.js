@@ -148,12 +148,16 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         repository.saveWorkspace(cmid, stateB64);
     };
 
-    const submitWorkspace = (inputFuncDecs) => {
+    const submitWorkspace = async(inputFuncDecs) => {
         const codeString = lib.getWorkspaceCode(nextblocksWorkspace, inputFuncDecs).getSubmittableCodeString();
         const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
         const stateB64 = btoa(JSON.stringify(state));
         const cmid = getCMID();
         repository.submitWorkspace(cmid, stateB64, codeString);
+
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+        await delay(1000);
+
         location.reload();
     };
 

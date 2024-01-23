@@ -148,7 +148,7 @@ echo '<div id="nextblocks-container" class="container-fluid mt-6 mb-6">
                         </div>
                         <div class="col-md-4 h-100">
                             <div class="row h-75">
-                                <img id="emoji-easy" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary bg-primary rounded mh-100" src="pix/emoji-easy.png" alt="Dummy laugh image">
+                                <img id="emoji-easy" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary rounded mh-100" src="pix/emoji-easy.png" alt="Dummy laugh image">
                             </div>
                             <div id="percentage-easy" class="col-md-12 text-center"></div>
                         </div>

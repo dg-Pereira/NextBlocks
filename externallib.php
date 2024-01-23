@@ -111,11 +111,12 @@ class mod_nextblocks_external extends external_api {
             }
 
             $test_output = self::run_test_jobe($codeString);
-            nextblocks_log("test output: " . $test_output . " expected output: " . $expected_output);
             if ($test_output == $expected_output) {
                 $testsCorrectCount++;
             }
         }
+
+
         return $testsCorrectCount;
     }
 
