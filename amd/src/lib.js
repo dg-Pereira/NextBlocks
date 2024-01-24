@@ -60,7 +60,7 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
      * @param {boolean} debugMode whether to display the code as is, or with the wrapper function
      * @returns {string} the formatted code
      */
-    const formatCodeHTML = (code, debugMode = false) => {
+    const formatCodeHTML = (code, debugMode = true) => {
         if (!debugMode) {
             return "<pre>" + code.getPrintableCodeString() + "</pre>";
         } else {
