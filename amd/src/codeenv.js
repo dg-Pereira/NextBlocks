@@ -347,55 +347,40 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 });
 
 // Makes background of image blue if it is not blue, and vice versa
-const changeImageBackground = function(img) {
-    // Change background of all other images to secondary
-    const imgs = document.getElementsByClassName("emoji-img");
-    Array.from(imgs).forEach((otherImg) => {
-        if (otherImg !== img) {
-            otherImg.classList.remove("bg-primary");
-            otherImg.classList.add("bg-secondary");
-        }
+const changeImageBackground = img => {
+    document.querySelectorAll(".emoji-img").forEach(otherImg => {
+        otherImg.classList.toggle("bg-primary", otherImg === img);
+        otherImg.classList.toggle("bg-secondary", otherImg !== img);
     });
-
-    // Toggle background of clicked image
-    if (img.classList.contains("bg-primary")) {
-        img.classList.remove("bg-primary");
-        img.classList.add("bg-secondary");
-    } else {
-        img.classList.remove("bg-secondary");
-        img.classList.add("bg-primary");
-    }
 };
 
 const updatePercentages = function(easy, medium, hard, inc = "") {
-    const easyDiv = document.getElementById('percentage-easy');
-    const mediumDiv = document.getElementById('percentage-medium');
-    const hardDiv = document.getElementById('percentage-hard');
+    const elements = {
+        "easy": document.getElementById('percentage-easy'),
+        "medium": document.getElementById('percentage-medium'),
+        "hard": document.getElementById('percentage-hard')
+    };
 
-    if (inc === "easy") {
-        easy++;
-    } else if (inc === "medium") {
-        medium++;
-    } else if (inc === "hard") {
-        hard++;
+    const values = {
+        "easy": easy,
+        "medium": medium,
+        "hard": hard
+    };
+
+    if (inc in values) {
+        values[inc]++;
     }
 
-    let percentages = calcPercentages(easy, medium, hard);
+    let percentages = calcPercentages(values.easy, values.medium, values.hard);
 
-    easyDiv.innerHTML = percentages[0] + '%';
-    mediumDiv.innerHTML = percentages[1] + '%';
-    hardDiv.innerHTML = percentages[2] + '%';
+    elements.easy.innerHTML = percentages[0] + '%';
+    elements.medium.innerHTML = percentages[1] + '%';
+    elements.hard.innerHTML = percentages[2] + '%';
 };
 
-const calcPercentages = function(easy, medium, hard) {
+const calcPercentages = (easy, medium, hard) => {
     const total = easy + medium + hard;
-    if (total === 0) {
-        return [0, 0, 0];
-    }
-    const easyPercentage = Math.round((easy / total) * 100);
-    const mediumPercentag = Math.round((medium / total) * 100);
-    const hardPercentag = Math.round((hard / total) * 100);
-    return [easyPercentage, mediumPercentag, hardPercentag];
+    return total === 0 ? [0, 0, 0] : [easy, medium, hard].map(val => Math.round((val / total) * 100));
 };
 
 const getOptions = function(remainingSubmissions) {
