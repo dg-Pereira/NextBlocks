@@ -352,32 +352,59 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 });
 
 // Makes background of image blue if it is not blue, and vice versa
-const changeImageBackground = img => {
-    document.querySelectorAll(".emoji-img").forEach(otherImg => {
-        otherImg.classList.toggle("bg-primary", otherImg === img);
-        otherImg.classList.toggle("bg-secondary", otherImg !== img);
+const changeImageBackground = function(img) {
+    // Change background of all other images to secondary
+    const imgs = document.getElementsByClassName("emoji-img");
+    Array.from(imgs).forEach((otherImg) => {
+        if (otherImg !== img) {
+            otherImg.classList.remove("bg-primary");
+            otherImg.classList.add("bg-secondary");
+        }
     });
+
+    // Toggle background of clicked image
+    if (img.classList.contains("bg-primary")) {
+        img.classList.remove("bg-primary");
+        img.classList.add("bg-secondary");
+    } else {
+        img.classList.remove("bg-secondary");
+        img.classList.add("bg-primary");
+    }
 };
 
+/**
+ * Updates the percentages of difficulty levels (easy, medium, hard) on the page.
+ *
+ * @param {number} easy - The count of 'easy' reactions.
+ * @param {number} medium - The count of 'medium' reactions.
+ * @param {number} hard - The count of 'hard' reactions.
+ * @param {string} [inc=""] - The difficulty level to increment. If not provided, no level is incremented.
+ * Unused right now, just for future-proofing
+ */
 const updatePercentages = function(easy, medium, hard, inc = "") {
+    // Mapping of difficulty levels to their corresponding HTML elements
     const elements = {
         "easy": document.getElementById('percentage-easy'),
         "medium": document.getElementById('percentage-medium'),
         "hard": document.getElementById('percentage-hard')
     };
 
+    // Mapping of difficulty levels to their counts
     const values = {
         "easy": easy,
         "medium": medium,
         "hard": hard
     };
 
+    // If a difficulty level to increment is provided, increment its count
     if (inc in values) {
         values[inc]++;
     }
 
+    // Calculate the percentages for each difficulty level
     let percentages = calcPercentages(values.easy, values.medium, values.hard);
 
+    // Update the HTML elements with the new percentages
     elements.easy.innerHTML = percentages[0] + '%';
     elements.medium.innerHTML = percentages[1] + '%';
     elements.hard.innerHTML = percentages[2] + '%';
