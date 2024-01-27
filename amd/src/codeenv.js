@@ -334,7 +334,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                     if (loadedSave === null) { // Only add to workspace if there is no workspace to load
                         const blockName = "forced_input_" + inputName;
                         let newBlock = addBlockToWorkspace(blockName, nextblocksWorkspace);
-                        newBlock.moveBy(0, i * 50); // Move block down a bit so that they don't overlap
+                        newBlock.moveBy(0, i * 50 + 50); // Move block down a bit so that they don't overlap
                     }
                 });
             }
@@ -526,7 +526,7 @@ function createForcedInputBlock(prompt, inputType, inputFunctionDeclarations) {
     } else if (inputType === "number") {
         Blockly.Blocks[blockName] = {
             init: function() {
-                this.appendDummyInput().appendField(prompt).appendField(new Blockly.FieldNumber(0), "number_input");
+                this.appendDummyInput().appendField(prompt).appendField(new Blockly.FieldNumber(0), prompt);
                 this.setOutput(true, "Number");
                 this.setColour(180);
                 this.setTooltip("");
@@ -536,8 +536,8 @@ function createForcedInputBlock(prompt, inputType, inputFunctionDeclarations) {
 
         // eslint-disable-next-line no-unused-vars
         javascript.javascriptGenerator.forBlock[blockName] = function(block, generator) {
-            const number = block.getFieldValue('number_input');
-            let blockCode = 'input(' + number + ')';
+            const number = block.getFieldValue(prompt);
+            let blockCode = `input${prompt}(${number})`;
             return [blockCode, Blockly.JavaScript.ORDER_NONE];
         };
     }
