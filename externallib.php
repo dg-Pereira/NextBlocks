@@ -101,10 +101,6 @@ class mod_nextblocks_external extends external_api {
                         $input = $inputValue_;
                     }
                 }
-
-                error_log($input, 3, "C:\wamp64\logs\php_error.log");
-
-
                 // Get the indices of the first and second parentheses of the last occurrence of the input function call
                 $firstParenIndex = strrpos($codeString, "input" . $inputName . "(");
                 $secondParenIndex = strpos($codeString, ")", $firstParenIndex);
