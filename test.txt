@@ -19,12 +19,12 @@ Number2: number
 |
 _
 Number1: number
-40
+40000000
 _
 Number2: number
-100
+1000
 -
-4000
+40000000000
 |
 _
 Number1: number

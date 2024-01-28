@@ -156,21 +156,25 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
          * @returns {String[]} the output of each test
          */
         runTests: function(code, tests) {
-            // eslint-disable-next-line no-console
-            console.log("AAAAAAAAA" + tests);
             let results = [];
+            // eslint-disable-next-line no-console
+            console.log(code);
             tests.forEach((test) => {
                 let thisTestCode = code; // Need to copy, so that the code is not modified for the next test
                 const inputs = test.inputs;
                 inputs.forEach((input) => {
                     const prompt = Object.keys(input)[0];
-                    const values = input[prompt];
+                    const values = Object.values(input[prompt])[0];
 
                     const inputIndex = thisTestCode.lastIndexOf(prompt);
                     // Get the indexes of the first and second parentheses of the input function call
-                    let inputParentheses1 = thisTestCode.indexOf('(', inputIndex);
+                    const inputParentheses1 = thisTestCode.indexOf('(', inputIndex);
                     const inputParentheses2 = thisTestCode.indexOf(')', inputParentheses1 + 1);
 
+                    // eslint-disable-next-line no-console
+                    console.log(thisTestCode);
+                    // eslint-disable-next-line no-console
+                    console.log(inputParentheses1, inputParentheses2);
                     const preStr = thisTestCode.substring(0, inputParentheses1 + 1);
                     const postStr = thisTestCode.substring(inputParentheses2);
 
@@ -191,18 +195,10 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
          */
         getMissingInputCalls: function(code, inputFuncDecs) {
 
-            // eslint-disable-next-line no-console
-            console.log(inputFuncDecs);
-
             // Regex to match input function calls outside of comments
             const regex = /((?!\/\/ ).{3}|^.{0,2})\binput\w+\s*\([^)]*\)(?=\s*;|\s*\)|\s*[,)])/g;
             const functionDecNames = extractFunctionNames(inputFuncDecs);
-            // eslint-disable-next-line no-console
-            console.log(functionDecNames);
             const matches = code.match(regex);
-
-            // eslint-disable-next-line no-console
-            console.log(matches);
 
             if (matches === null) {
                 return functionDecNames;
