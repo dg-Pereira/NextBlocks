@@ -111,7 +111,6 @@ $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid))
 $runButton = '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
 $runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />' : '';
 
-
 echo $OUTPUT->heading($title);
 echo '<p>' . $description . '</p>';
 
