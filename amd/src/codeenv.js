@@ -267,7 +267,6 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          * (0 = no reaction, 1 = easy, 2 = medium, 3 = hard)
          */
         init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction) {
-
             updatePercentages(reactions[0], reactions[1], reactions[2]);
 
             const blocklyDiv = document.getElementById('blocklyDiv');

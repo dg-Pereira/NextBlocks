@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
-global $DB, $OUTPUT, $PAGE, $CFG, $page, $USER;
 
 /**
  * Prints an instance of mod_nextblocks.
@@ -23,7 +22,7 @@ global $DB, $OUTPUT, $PAGE, $CFG, $page, $USER;
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use event\course_module_viewed;
+global $DB, $OUTPUT, $PAGE, $CFG, $page, $USER;
 
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
@@ -108,82 +107,9 @@ echo $OUTPUT->header();
 $title = $DB->get_field('nextblocks', 'name', array('id' => $instanceid));
 $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid));
 
-$runButton = '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
+//$runButton = '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
 $runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />' : '';
 
-echo $OUTPUT->heading($title);
-echo '<p>' . $description . '</p>';
-
-echo '<hr>';
-
-echo '<div id="nextblocks-container" class="container-fluid mt-6 mb-6">
-    <div class="row h-100">
-        <div id = "blocklyArea" class="col-md-9 h-100">
-            <div id="blocklyDiv" class="mw-100 h-100"></div>
-        </div>
-        <div class="col-md-3 mh-100 h-100">
-            <div class="row h-25 border">
-                <!-- "reactions" on top, and a row of three buttons below" -->
-                <div class="col-md-12 h-100">
-                    <div class="row h-25">
-                        <!-- centered text "reactions" -->
-                        <div class="col-md-12 text-center">
-                            '. $OUTPUT->heading("Reactions", $level=4) . '
-                        </div>
-                    </div>
-                    <div class="row h-75">
-                        <!-- three emoji reactions -->
-                        <div class="col-md-4 h-100">
-                            <div class="row h-75">
-                                <img id="emoji-hard" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary rounded mh-100" src="pix/emoji-hard.png" alt="Dummy laugh image" role="button">
-                            </div>
-                            <div id="percentage-hard" class="col-md-12 text-center"></div>
-                        </div>
-                        <div class="col-md-4 h-100">
-                            <div class="row h-75">
-                                <img id="emoji-medium" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary rounded mh-100" src="pix/emoji-think.png" alt="Dummy laugh image">
-                            </div>
-                            <div id="percentage-medium" class="col-md-12 text-center"></div>
-                        </div>
-                        <div class="col-md-4 h-100">
-                            <div class="row h-75">
-                                <img id="emoji-easy" class = "emoji-img img-fluid border border-secondary mx-auto d-block p-1 bg-secondary rounded mh-100" src="pix/emoji-easy.png" alt="Dummy laugh image">
-                            </div>
-                            <div id="percentage-easy" class="col-md-12 text-center"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row h-75 border">
-                <div class="col-md-12 h-100">
-                    <div class="row h-10">
-                        <div class="col-md-12 text-center">
-                            '. $OUTPUT->heading("Output", $level=4) . '
-                        </div>
-                    </div>
-                    <div class="row h-75">
-                        <div id="output-div" class="col-md-12 h-100 p-2">
-                        </div>
-                    </div>  
-                    <div class="row h-15">
-                        <!-- run and run tests buttons -->
-                        <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-md-12 text-center">
-                                    <input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />' .
-                                    $runTestsButton . '
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>';
-
-//make div for displaying static code text
-echo '<div id="codeDiv" class="container mt-6 mb-6"></div>';
 
 //display tests file
 /*
@@ -195,20 +121,14 @@ if($filenamehash != false){
 }
 */
 
-//make buttons centered
-echo '<div style="text-align: center;">';
+$data = [
+    'title' => $OUTPUT->heading($title),
+    'description' => $description,
+    'outputHeading' => $OUTPUT->heading("Output", $level=4),
+    'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
+    'runTestsButton' => $runTestsButton
+];
 
-echo '<input id="saveButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_save", "nextblocks").'" />';
-echo '<input id="submitButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_submit", "nextblocks").'" />';
-echo '<input id="cancelButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_cancel", "nextblocks").'" />';
-
-echo '</div>';
-
-//make horizontal separator
-echo '<hr>';
-
-echo '<div style="text-align: center;">';
-echo '<img src="pix/chat.png" alt="Dummy chat image">';
-echo '</div>';
+echo $OUTPUT->render_from_template('mod_nextblocks/nextblocks', $data);
 
 echo $OUTPUT->footer();
