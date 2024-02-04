@@ -14,9 +14,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+global $PAGE, $OUTPUT, $USER;
 
 /**
- * Plugin capabilities
+ * NextBlocks report page.
  *
  * @package    mod_nextblocks
  * @copyright  2024 Duarte Pereira
@@ -24,7 +25,8 @@
  */
 
 global $DB;
-require_once("../../config.php");
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/lib.php');
 
 // Course module id.
 $id = optional_param('id', 0, PARAM_INT);
@@ -44,7 +46,18 @@ if ($id) {
 
 require_login($course, true, $cm);
 
-echo '<h1>Report</h1>';
+$modulecontext = context_module::instance($cm->id);
+
+//import css
+echo '<link rel="stylesheet" href="styles.css">';
+//import icons
+echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">';
+
+//import blockly
+echo '<script src="./blockly/blockly_compressed.js"></script>
+    <script src="./blockly/blocks_compressed.js"></script>
+    <script src="./blockly/msg/en.js"></script>
+    <script src="./blockly/javascript_compressed.js"></script>';
 
 $id = required_param('id', PARAM_INT);
 $userid = required_param('userid', PARAM_INT);
@@ -54,9 +67,48 @@ $instanceid = $cm->instance;
 
 $record = $DB->get_record('nextblocks_userdata', array('userid' => $userid, 'nextblocksid' => $instanceid));
 
-if (!$record) {
-    echo '<p>No workspace found for this user.</p>';
-    return;
+$saved_workspace = $record->saved_workspace;
+
+// get custom blocks
+$custom_blocks = $DB->get_records('nextblocks_customblocks', array('nextblocksid' => $instanceid));
+$custom_blocks_json = array();
+foreach ($custom_blocks as $custom_block) {
+    $custom_blocks_json[] = array(
+        'definition' => $custom_block->blockdefinition,
+        'generator' => $custom_block->blockgenerator
+    );
 }
 
-echo base64_decode($record->submitted_workspace);
+$fs = get_file_storage();
+$filenamehash = get_filenamehash($instanceid);
+
+$tests_file = $fs->get_file_by_hash($filenamehash);
+$tests_file_contents = $tests_file ? $tests_file->get_content() : null;
+
+$reactions = [intval($moduleinstance->reactionseasy), intval($moduleinstance->reactionsmedium), intval($moduleinstance->reactionshard)];
+$last_user_reaction = intval($record->reacted);
+
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction]);
+
+$PAGE->set_url('/mod/nextblocks/report.php', array('id' => $cm->id));
+$PAGE->set_title(format_string($moduleinstance->name));
+$PAGE->set_heading(format_string($course->fullname));
+$PAGE->set_context($modulecontext);
+
+$title = $DB->get_field('nextblocks', 'name', array('id' => $instanceid));
+$description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid));
+
+//$runButton = '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
+$runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />' : '';
+
+$data = [
+    'title' => $OUTPUT->heading($title),
+    'description' => $description,
+    'outputHeading' => $OUTPUT->heading("Output", $level=4),
+    'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
+    'runTestsButton' => $runTestsButton
+];
+
+echo $OUTPUT->header();
+echo $OUTPUT->render_from_template('mod_nextblocks/nextblocks', $data);
+echo $OUTPUT->footer();

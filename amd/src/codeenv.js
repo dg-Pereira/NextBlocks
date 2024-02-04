@@ -318,7 +318,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             // Parse json from test file contents
             const tests = JSON.parse(contents);
             let inputFunctionDeclarations = {funcDecs: ""};
-
+            // eslint-disable-next-line no-console
+            console.log("AAAAAA " + tests);
             if (tests !== null) {
                 // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
                 // was a workspace to load, they would be added twice.
@@ -617,7 +618,7 @@ Blockly.Blocks.start = {
 
 // eslint-disable-next-line no-unused-vars
 javascript.javascriptGenerator.forBlock.start = function(block, generator) {
-    // get all blocks attached to this block
+    // Get all blocks attached to this block
     let code = '';
     return code;
 };
