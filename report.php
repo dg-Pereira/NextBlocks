@@ -88,7 +88,12 @@ $tests_file_contents = $tests_file ? $tests_file->get_content() : null;
 $reactions = [intval($moduleinstance->reactionseasy), intval($moduleinstance->reactionsmedium), intval($moduleinstance->reactionshard)];
 $last_user_reaction = intval($record->reacted);
 
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction]);
+if (has_capability('mod/nextblocks:gradeitems', context_module::instance($cm->id))) {
+    $reportType = 1;
+} else {
+    $reportType = 2;
+}
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType]);
 
 $PAGE->set_url('/mod/nextblocks/report.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
@@ -106,7 +111,8 @@ $data = [
     'description' => $description,
     'outputHeading' => $OUTPUT->heading("Output", $level=4),
     'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
-    'runTestsButton' => $runTestsButton
+    'runTestsButton' => $runTestsButton,
+    'showSubmitButton' => false,
 ];
 
 echo $OUTPUT->header();

@@ -109,7 +109,9 @@
 
 <div style="text-align: center;">
     <input id="saveButton" type="submit" class="btn btn-primary m-2" value="{{#str}} nextblocks_save, mod_nextblocks {{/str}}"/>
-    <input id="submitButton" type="submit" class="btn btn-primary m-2" value="{{#str}} nextblocks_submit, mod_nextblocks {{/str}}"/>
+    {{#showSubmitButton}}
+        <input id="submitButton" type="submit" class="btn btn-primary m-2" value="{{#str}} nextblocks_submit, mod_nextblocks {{/str}}"/>
+    {{/showSubmitButton}}
     <input id="cancelButton" type="submit" class="btn btn-primary m-2" value="{{#str}} nextblocks_cancel, mod_nextblocks {{/str}}"/>
 </div>
 

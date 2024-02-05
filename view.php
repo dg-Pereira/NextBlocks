@@ -95,7 +95,7 @@ if($record) {
 $reactions = [intval($moduleinstance->reactionseasy), intval($moduleinstance->reactionsmedium), intval($moduleinstance->reactionshard)];
 $last_user_reaction = $record ? intval($record->reacted) : 0;
 
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, $remaining_submissions, $reactions, $last_user_reaction]);
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, $remaining_submissions, $reactions, $last_user_reaction, 0]);
 
 $PAGE->set_url('/mod/nextblocks/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($moduleinstance->name));
@@ -109,7 +109,6 @@ $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid))
 
 //$runButton = '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
 $runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />' : '';
-
 
 //display tests file
 /*
@@ -126,7 +125,8 @@ $data = [
     'description' => $description,
     'outputHeading' => $OUTPUT->heading("Output", $level=4),
     'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
-    'runTestsButton' => $runTestsButton
+    'runTestsButton' => $runTestsButton,
+    'showSubmitButton' => true,
 ];
 
 echo $OUTPUT->render_from_template('mod_nextblocks/nextblocks', $data);
