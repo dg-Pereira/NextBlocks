@@ -33,6 +33,24 @@
     }
 }}
 
+{{#showGrader}}
+    <div class="container mt-6 mb-6">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="border p-6" role="alert">
+                    <h4> {{studentName}} NextBlocks Report</h4>
+                    <p> {{studentName}}'s code has been graded. Here are the results:</p>
+                    {{currentGrade}} / {{maxGrade}}
+                    <hr>
+                    {{{graderForm}}}
+                </div>
+            </div>
+        </div>
+    </div>
+{{/showGrader}}
+
+{{! The main page content }}
+
 {{{title}}}
 <p> {{{description}}} </p>
 

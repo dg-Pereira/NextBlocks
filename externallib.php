@@ -67,7 +67,7 @@ class mod_nextblocks_external extends external_api {
     }
 
     public static function auto_grade($cm, $codeString, $nextblocks, $tests_file) {
-        global $USER;
+        global $USER, $DB;
 
         $tests_file_contents = $tests_file->get_content();
 
@@ -82,6 +82,10 @@ class mod_nextblocks_external extends external_api {
         $grades->rawgrade = $newGrade;
 
         nextblocks_grade_item_update($nextblocks, $grades);
+
+        // update userdata with new grade
+        $userdata = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
+        $DB->update_record('nextblocks_userdata', array('id' => $userdata->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'grade' => $newGrade));
     }
 
     public static function run_tests_jobe($tests, $codeString): int {

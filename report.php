@@ -96,15 +96,23 @@ if (has_capability('mod/nextblocks:gradeitems', context_module::instance($cm->id
 $PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType]);
 
 $PAGE->set_url('/mod/nextblocks/report.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($moduleinstance->name));
+$PAGE->set_title("Report " . format_string($moduleinstance->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);
 
 $title = $DB->get_field('nextblocks', 'name', array('id' => $instanceid));
 $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid));
 
-//$runButton = '<input id="runButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_run", "nextblocks").'" />';
 $runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />' : '';
+
+$mform = new \mod_nextblocks\form\grade_submit();
+
+$graderForm = $mform->render();
+
+$student = $DB->get_record('user', array('id' => $userid));
+
+$currentGrade = $record->grade;
+$maxGrade = $moduleinstance->grade;
 
 $data = [
     'title' => $OUTPUT->heading($title),
@@ -113,6 +121,11 @@ $data = [
     'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
     'runTestsButton' => $runTestsButton,
     'showSubmitButton' => false,
+    'showGrader' => true,
+    'graderForm' => $graderForm,
+    'studentName' => $student->firstname . ' ' . $student->lastname,
+    'currentGrade' => $currentGrade,
+    'maxGrade' => $maxGrade,
 ];
 
 echo $OUTPUT->header();

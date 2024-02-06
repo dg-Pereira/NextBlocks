@@ -127,6 +127,7 @@ $data = [
     'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
     'runTestsButton' => $runTestsButton,
     'showSubmitButton' => true,
+    'showGrader' => false,
 ];
 
 echo $OUTPUT->render_from_template('mod_nextblocks/nextblocks', $data);

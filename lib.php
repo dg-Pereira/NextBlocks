@@ -33,9 +33,8 @@ defined('MOODLE_INTERNAL') || die();
  */
 function nextblocks_supports(string $feature): ?bool {
     switch ($feature) {
-    case FEATURE_MOD_INTRO:
-        return true;
     case FEATURE_GRADE_HAS_GRADE:
+    case FEATURE_MOD_INTRO:
         return true;
     default:
         return null;
