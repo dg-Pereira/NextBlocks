@@ -102,7 +102,7 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
             let accordion = '<div style="max-height: 100%; overflow-y: auto;">';
             if (results === null) {
                 accordion += '<div class="alert alert-warning" role="alert">';
-                accordion += 'Not all input functions were called. No tests will be run.';
+                accordion += 'Not all input functions were called. No tests will be executed.';
                 // Show which input functions were not called
                 accordion += '<br>Input functions not called: ' + uncalledInputFuncs.join(', ');
                 accordion += '</div>';

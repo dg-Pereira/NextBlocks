@@ -370,8 +370,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
  */
 const lockWorkspaceBlocks = function(workspace) {
     workspace.getTopBlocks(false).forEach((block) => {
-        block.setMovable(false);
-        block.setDeletable(false);
+        lockBlock(block);
         lockChildren(block);
     });
 
@@ -381,8 +380,7 @@ const lockWorkspaceBlocks = function(workspace) {
      */
     function lockChildren(block) {
         block.getChildren(false).forEach((child) => {
-            child.setMovable(false);
-            child.setDeletable(false);
+            lockBlock(child);
 
             // Have to mess with internal Blockly stuff to block only the inputs while still allowing comments
             child.inputList.forEach((input) => {
@@ -393,6 +391,15 @@ const lockWorkspaceBlocks = function(workspace) {
 
             lockChildren(child);
         });
+    }
+
+    /**
+     * Locks a block, preventing it from being moved or deleted
+     * @param {BlockSvg} block The block that will be locked
+     */
+    function lockBlock(block) {
+        block.setMovable(false);
+        block.setDeletable(false);
     }
 };
 

@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-global $PAGE, $OUTPUT, $USER;
+
 
 /**
  * NextBlocks report page.
@@ -23,8 +23,8 @@ global $PAGE, $OUTPUT, $USER;
  * @copyright  2024 Duarte Pereira
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+global $PAGE, $OUTPUT, $USER, $DB;
 
-global $DB;
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -51,18 +51,10 @@ $modulecontext = context_module::instance($cm->id);
 //import css
 echo '<link rel="stylesheet" href="styles.css">';
 //import icons
-echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">';
+//echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">';
 
-//import blockly
-echo '<script src="./blockly/blockly_compressed.js"></script>
-    <script src="./blockly/blocks_compressed.js"></script>
-    <script src="./blockly/msg/en.js"></script>
-    <script src="./blockly/javascript_compressed.js"></script>';
-
-$id = required_param('id', PARAM_INT);
 $userid = required_param('userid', PARAM_INT);
 
-$cm = get_coursemodule_from_id('nextblocks', $id, 0, false, MUST_EXIST);
 $instanceid = $cm->instance;
 
 $record = $DB->get_record('nextblocks_userdata', array('userid' => $userid, 'nextblocksid' => $instanceid));

@@ -30,7 +30,7 @@ class grade_submit extends moodleform {
 
         $this->add_action_buttons(false);
     }
-
+//try copying code from mod_form
     // Custom validation should be added here.
     function validation($data, $files) {
         error_log("validation", 3, "C:\wamp64\logs\php_error.log");

@@ -71,7 +71,6 @@ $saved_workspace = $record ? $record->saved_workspace : null;
 
 // get custom blocks
 $custom_blocks = $DB->get_records('nextblocks_customblocks', array('nextblocksid' => $instanceid));
-nextblocks_console_log($custom_blocks);
 $custom_blocks_json = array();
 foreach ($custom_blocks as $custom_block) {
     $custom_blocks_json[] = array(
