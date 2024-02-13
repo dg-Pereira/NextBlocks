@@ -63,13 +63,19 @@ $capabilities = [
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
+            'student' => CAP_PROHIBIT,
+            'guest' => CAP_PROHIBIT,
         ],
     ],
     'mod/nextblocks:isgraded' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => [
+            'teacher' => CAP_PROHIBIT,
+            'editingteacher' => CAP_PROHIBIT,
+            'manager' => CAP_PROHIBIT,
             'student' => CAP_ALLOW,
+            'guest' => CAP_PROHIBIT,
         ],
     ],
 ];

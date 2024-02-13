@@ -53,6 +53,12 @@ echo '<link rel="stylesheet" href="styles.css">';
 //import icons
 //echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">';
 
+//import blockly
+echo '<script src="./blockly/blockly_compressed.js"></script>
+    <script src="./blockly/blocks_compressed.js"></script>
+    <script src="./blockly/msg/en.js"></script>
+    <script src="./blockly/javascript_compressed.js"></script>';
+
 $userid = required_param('userid', PARAM_INT);
 
 $instanceid = $cm->instance;

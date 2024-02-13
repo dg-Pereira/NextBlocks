@@ -61,12 +61,14 @@ $grades = array();
 foreach ($record as $r) {
     $userid = $r->userid;
 
+    nextblocks_console_log(has_capability('mod/nextblocks:isgraded', $modulecontext, $userid));
+
     if (has_capability('mod/nextblocks:isgraded', $modulecontext, $userid)) { //switch to this one after reinstalling the plugin
     //if (has_capability('mod/nextblocks:viewreports', $modulecontext, $userid)) {
         $user = $DB->get_record('user', array('id' => $r->userid));
         $grade = $r->grade ?? "-";
         //$submission = $r->submission_timestamp;
-        $reaction = $r-"">reacted == 0 ? "-" : $r->reacted;
+        $reaction = $r->reacted == 0 ? "-" : $r->reacted;
         $grades[] = array('username' => $user->username, 'userId'=> $userid, 'grade' => $grade, /*'submission' => $submission, */'reaction' => $reaction);
     }
 }

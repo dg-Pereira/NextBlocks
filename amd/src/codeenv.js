@@ -213,11 +213,13 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
         const saveButton = document.getElementById('saveButton');
         saveButton.addEventListener('click', saveState);
 
-        // Listen for clicks on the submit button
+        // Listen for clicks on the submit button, if it exists (doesn't exist in report pages)
         const submitButton = document.getElementById('submitButton');
-        submitButton.addEventListener('click', () => {
-            submitWorkspace(inputFuncDecs);
-        });
+        if (submitButton !== null) {
+            submitButton.addEventListener('click', () => {
+                submitWorkspace(inputFuncDecs);
+            });
+        }
 
         // Convert the lastUserReaction to a string
         let lastUserReactionString = "";
@@ -273,7 +275,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          * 2 = student report).
          */
         init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction, reportType = 0) {
-            // if report is student but he can still submit, change to no report so he can use the workspace
+            // If report is student but he can still submit, change to no report so he can use the workspace
             if (reportType === 2 && remainingSubmissions > 0) {
                 reportType = 0;
             }
