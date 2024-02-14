@@ -26,14 +26,20 @@ class grade_submit extends moodleform {
     public function definition() {
         $mform = $this->_form;
 
-        $mform->addElement('float', 'newgrade', get_string('newgrade', 'mod_nextblocks'));
+        // Somehow passing the id and userid to the form as hidden fields makes it redirect correctly
+        $id = required_param('id', PARAM_INT);
+        $userid = required_param('userid', PARAM_INT);
+        $mform->addElement('hidden', 'id', $id);
+        $mform->setType('id', PARAM_INT);
+        $mform->addElement('hidden', 'userid', $userid);
+        $mform->setType('userid', PARAM_INT);
 
+        $mform->addElement('float', 'newgrade', get_string('newgrade', 'mod_nextblocks'));
         $this->add_action_buttons(false);
     }
-//try copying code from mod_form
+
     // Custom validation should be added here.
     function validation($data, $files) {
-        error_log("validation", 3, "C:\wamp64\logs\php_error.log");
-        return [];
+        return parent::validation($data, $files);
     }
 }

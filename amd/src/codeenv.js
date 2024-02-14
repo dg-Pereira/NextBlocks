@@ -144,7 +144,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
      * Saves the current state of the workspace to the database, for later retrieval and display
      * By default, the workspace is saved to the currently logged-in user's entry in the database
      * If a teacher is adding a comment to a student's submission, the student's id is passed as an argument,
-     * because in that case the workspace should be saved to the student's entry in the database, not to the teacher's
+     * because in that case the workspace should be saved to the student's entry in the database, not to the teacher's.
      * @param {bool} isTeacherReport whether the current page is a teacher report. If so, we need to pass the student's id,
      * because PHP will not be able to get it from the user api, as the logged-in user will be the teacher
      */
@@ -157,9 +157,6 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             const queryString = window.location.search;
             const urlParams = new URLSearchParams(queryString);
             const userId = urlParams.get('userid');
-
-            // eslint-disable-next-line no-console
-            console.log(userId);
 
             repository.saveWorkspace(cmid, stateB64, userId);
         } else {

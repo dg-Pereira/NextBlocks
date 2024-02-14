@@ -25,6 +25,8 @@
  */
 global $PAGE, $OUTPUT, $USER, $DB;
 
+use mod_nextblocks\form\grade_submit;
+
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -103,29 +105,40 @@ $description = $DB->get_field('nextblocks', 'intro', array('id' => $instanceid))
 
 $runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class="btn btn-primary m-2" value="'.get_string("nextblocks_runtests", "nextblocks").'" />' : '';
 
-$mform = new \mod_nextblocks\form\grade_submit();
+$mform = new grade_submit();
 
-$graderForm = $mform->render();
+if($data = $mform->get_data()) {
+    //This is where you can process the $data you get from the form
+    error_log('test2', 3, "C:\wamp64\logs\php_error.log");
 
-$student = $DB->get_record('user', array('id' => $userid));
+    //update grade
 
-$currentGrade = $record->grade;
-$maxGrade = $moduleinstance->grade;
+    //redirect to the same page
+    //redirect(new moodle_url('/nextblocks/report.php', array('id' => $moduleinstance->course)), 'Cancelled');
+    redirect(new moodle_url($PAGE->url, array('id' => $id, 'userid' => $userid)), 'Cancelled');
+} else {
+    $graderForm = $mform->render();
 
-$data = [
-    'title' => $OUTPUT->heading($title),
-    'description' => $description,
-    'outputHeading' => $OUTPUT->heading("Output", $level=4),
-    'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
-    'runTestsButton' => $runTestsButton,
-    'showSubmitButton' => false,
-    'showGrader' => true,
-    'graderForm' => $graderForm,
-    'studentName' => $student->firstname . ' ' . $student->lastname,
-    'currentGrade' => $currentGrade,
-    'maxGrade' => $maxGrade,
-];
+    $student = $DB->get_record('user', array('id' => $userid));
 
-echo $OUTPUT->header();
-echo $OUTPUT->render_from_template('mod_nextblocks/nextblocks', $data);
-echo $OUTPUT->footer();
+    $currentGrade = $record->grade;
+    $maxGrade = $moduleinstance->grade;
+
+    $data = [
+        'title' => $OUTPUT->heading($title),
+        'description' => $description,
+        'outputHeading' => $OUTPUT->heading("Output", $level=4),
+        'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
+        'runTestsButton' => $runTestsButton,
+        'showSubmitButton' => false,
+        'showGrader' => true,
+        'graderForm' => $graderForm,
+        'studentName' => $student->firstname . ' ' . $student->lastname,
+        'currentGrade' => $currentGrade,
+        'maxGrade' => $maxGrade,
+    ];
+
+    echo $OUTPUT->header();
+    echo $OUTPUT->render_from_template('mod_nextblocks/nextblocks', $data);
+    echo $OUTPUT->footer();
+}
