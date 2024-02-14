@@ -142,14 +142,29 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
     /**
      * Saves the current state of the workspace to the database, for later retrieval and display
+     * By default, the workspace is saved to the currently logged-in user's entry in the database
+     * If a teacher is adding a comment to a student's submission, the student's id is passed as an argument,
+     * because in that case the workspace should be saved to the student's entry in the database, not to the teacher's
+     * @param {bool} isTeacherReport whether the current page is a teacher report. If so, we need to pass the student's id,
+     * because PHP will not be able to get it from the user api, as the logged-in user will be the teacher
      */
-    const saveState = () => {
+    const saveState = (isTeacherReport) => {
         const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
-        // eslint-disable-next-line no-unused-vars
         const stateB64 = btoa(JSON.stringify(state));
-        // eslint-disable-next-line no-unused-vars
         const cmid = getCMID();
-        repository.saveWorkspace(cmid, stateB64);
+
+        if (isTeacherReport) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const userId = urlParams.get('userid');
+
+            // eslint-disable-next-line no-console
+            console.log(userId);
+
+            repository.saveWorkspace(cmid, stateB64, userId);
+        } else {
+            repository.saveWorkspace(cmid, stateB64);
+        }
     };
 
     const submitWorkspace = async(inputFuncDecs) => {
@@ -211,7 +226,9 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
         // Listen for clicks on the save button
         const saveButton = document.getElementById('saveButton');
-        saveButton.addEventListener('click', saveState);
+        saveButton.addEventListener('click', () => {
+            saveState(isTeacherReport);
+        });
 
         // Listen for clicks on the submit button, if it exists (doesn't exist in report pages)
         const submitButton = document.getElementById('submitButton');
@@ -760,3 +777,5 @@ class ToolboxLabel extends Blockly.ToolboxItem {
 Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, 'toolboxlabel', ToolboxLabel);
 
 Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCategory.registrationName, CustomCategory, true);
+
+// O problema é que, ao fazer save, estou a guardar o workspace do aluno na minha linha da base de dados, não na dele

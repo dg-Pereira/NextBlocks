@@ -5,15 +5,15 @@
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// eslint-disable-next-line no-unused-vars
 define(['core/ajax'], function(ajax) {
     return {
-        saveWorkspace: function(nextblocksid, saved_workspace) {
+        saveWorkspace: function(nextblocksid, saved_workspace, userid = null) {
             return ajax.call([{
                 methodname: 'mod_nextblocks_save_workspace',
                 args: {
                     nextblocksid: nextblocksid,
                     saved_workspace: saved_workspace,
+                    userid: userid,
                 },
             }])[0];
         },
