@@ -113,7 +113,6 @@ if($data = $mform->get_data()) {
 
     //update grade
 
-    //redirect to the same page
     //redirect(new moodle_url('/nextblocks/report.php', array('id' => $moduleinstance->course)), 'Cancelled');
     redirect(new moodle_url($PAGE->url, array('id' => $id, 'userid' => $userid)), 'Cancelled');
 } else {
@@ -124,6 +123,8 @@ if($data = $mform->get_data()) {
     $currentGrade = $record->grade;
     $maxGrade = $moduleinstance->grade;
 
+    $showGrader = has_capability('mod/nextblocks:gradeitems', context_module::instance($cm->id));
+
     $data = [
         'title' => $OUTPUT->heading($title),
         'description' => $description,
@@ -131,7 +132,7 @@ if($data = $mform->get_data()) {
         'reactionsHeading' => $OUTPUT->heading("Reactions", $level=4),
         'runTestsButton' => $runTestsButton,
         'showSubmitButton' => false,
-        'showGrader' => true,
+        'showGrader' => $showGrader,
         'graderForm' => $graderForm,
         'studentName' => $student->firstname . ' ' . $student->lastname,
         'currentGrade' => $currentGrade,
