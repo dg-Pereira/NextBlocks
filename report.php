@@ -113,8 +113,18 @@ if($data = $mform->get_data()) {
 
     //update grade
 
+    $grades = new stdClass();
+    $grades->userid = $userid;
+    $grades->rawgrade = $data->newgrade; // ir buscar o que está no form
+
+    nextblocks_grade_item_update($moduleinstance, $grades);
+
+    //update grade in nextblocks_userdata
+    $record->grade = $data->newgrade;
+    $DB->update_record('nextblocks_userdata', $record);
+
     //redirect(new moodle_url('/nextblocks/report.php', array('id' => $moduleinstance->course)), 'Cancelled');
-    redirect(new moodle_url($PAGE->url, array('id' => $id, 'userid' => $userid)), 'Cancelled');
+    redirect(new moodle_url($PAGE->url, array('id' => $id, 'userid' => $userid)), 'Grade Updated');
 } else {
     $graderForm = $mform->render();
 
