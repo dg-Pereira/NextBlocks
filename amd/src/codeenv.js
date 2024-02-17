@@ -142,14 +142,26 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
     /**
      * Saves the current state of the workspace to the database, for later retrieval and display
+     * By default, the workspace is saved to the currently logged-in user's entry in the database
+     * If a teacher is adding a comment to a student's submission, the student's id is passed as an argument,
+     * because in that case the workspace should be saved to the student's entry in the database, not to the teacher's.
+     * @param {bool} isTeacherReport whether the current page is a teacher report. If so, we need to pass the student's id,
+     * because PHP will not be able to get it from the user api, as the logged-in user will be the teacher
      */
-    const saveState = () => {
+    const saveState = (isTeacherReport) => {
         const state = Blockly.serialization.workspaces.save(nextblocksWorkspace);
-        // eslint-disable-next-line no-unused-vars
         const stateB64 = btoa(JSON.stringify(state));
-        // eslint-disable-next-line no-unused-vars
         const cmid = getCMID();
-        repository.saveWorkspace(cmid, stateB64);
+
+        if (isTeacherReport) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            const userId = urlParams.get('userid');
+
+            repository.saveWorkspace(cmid, stateB64, userId);
+        } else {
+            repository.saveWorkspace(cmid, stateB64);
+        }
     };
 
     const submitWorkspace = async(inputFuncDecs) => {
@@ -180,9 +192,10 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
      * @param {{}} tests The tests to be run
      * @param {WorkspaceSvg} workspace The workspace to get the code from
      * @param {string} inputFuncDecs
-     * @param {Number} lastUserReaction The type of reaction the current user last submitted
+     * @param {number} lastUserReaction The type of reaction the current user last submitted
+     * @param {boolean} isTeacherReport Whether the report to be displayed is a teacher report
      */
-    function setupButtons(tests, workspace, inputFuncDecs, lastUserReaction) {
+    function setupButtons(tests, workspace, inputFuncDecs, lastUserReaction, isTeacherReport) {
         // Listen for clicks on the run button
         const runButton = document.getElementById('runButton');
         runButton.addEventListener('click', function() {
@@ -210,13 +223,17 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
         // Listen for clicks on the save button
         const saveButton = document.getElementById('saveButton');
-        saveButton.addEventListener('click', saveState);
-
-        // Listen for clicks on the submit button
-        const submitButton = document.getElementById('submitButton');
-        submitButton.addEventListener('click', () => {
-            submitWorkspace(inputFuncDecs);
+        saveButton.addEventListener('click', () => {
+            saveState(isTeacherReport);
         });
+
+        // Listen for clicks on the submit button, if it exists (doesn't exist in report pages)
+        const submitButton = document.getElementById('submitButton');
+        if (submitButton !== null) {
+            submitButton.addEventListener('click', () => {
+                submitWorkspace(inputFuncDecs);
+            });
+        }
 
         // Convert the lastUserReaction to a string
         let lastUserReactionString = "";
@@ -244,30 +261,38 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 changeImageBackground(img);
             }
 
-            img.addEventListener("click", () => {
-                // Submit reaction, and wait for response with new reaction counts
-                const newReactionsPromise = repository.submitReaction(getCMID(), imageType);
-                newReactionsPromise.then((newReactions) => {
-                    updatePercentages(newReactions.reactionseasy, newReactions.reactionsmedium, newReactions.reactionshard);
-                    changeImageBackground(img);
+            // Only listen for clicks on the images if page is not a teacher report
+            if (!isTeacherReport) {
+                img.addEventListener("click", () => {
+                    // Submit reaction, and wait for response with new reaction counts
+                    const newReactionsPromise = repository.submitReaction(getCMID(), imageType);
+                    newReactionsPromise.then((newReactions) => {
+                        updatePercentages(newReactions.reactionseasy, newReactions.reactionsmedium, newReactions.reactionshard);
+                        changeImageBackground(img);
+                    });
                 });
-            });
+            }
         });
     }
 
     return {
         /**
-         * @param {string} contents The contents of the tests file
-         * @param {string} loadedSave The contents of the loaded save, in a base64-encoded JSON string
-         * @param {{}} customBlocks The custom blocks to be added to the toolbox, created by the exercise creator
-         * @param {number} remainingSubmissions The number of remaining submissions for the current user
+         * @param {string} contents The contents of the tests file.
+         * @param {string} loadedSave The contents of the loaded save, in a base64-encoded JSON string.
+         * @param {{}} customBlocks The custom blocks to be added to the toolbox, created by the exercise creator.
+         * @param {number} remainingSubmissions The number of remaining submissions for the current user.
          * @param {string[]} reactions An array of 3 strings, each containing the number of reactions of a certain type
-         * (easy, medium, hard)
+         * (easy, medium, hard).
          * @param {number} lastUserReaction The type of reaction the current user last submitted
-         * (0 = no reaction, 1 = easy, 2 = medium, 3 = hard)
+         * (0 = no reaction, 1 = easy, 2 = medium, 3 = hard).
+         * @param {number} reportType Indicates the type of report to be displayed (0 = no report, 1 = teacher report,
+         * 2 = student report).
          */
-        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction) {
-
+        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction, reportType = 0) {
+            // If report is student but he can still submit, change to no report so he can use the workspace
+            if (reportType === 2 && remainingSubmissions > 0) {
+                reportType = 0;
+            }
             updatePercentages(reactions[0], reactions[1], reactions[2]);
 
             const blocklyDiv = document.getElementById('blocklyDiv');
@@ -309,7 +334,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 eval(block.generator);
             });
 
-            nextblocksWorkspace = Blockly.inject(blocklyDiv, getOptions(remainingSubmissions));
+            nextblocksWorkspace = Blockly.inject(blocklyDiv, getOptions(remainingSubmissions, reportType !== 0));
             javascript.javascriptGenerator.init(nextblocksWorkspace);
 
             // Use resize observer instead of window resize event. This captures both window resize and element resize
@@ -319,7 +344,6 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             // Parse json from test file contents
             const tests = JSON.parse(contents);
             let inputFunctionDeclarations = {funcDecs: ""};
-
             if (tests !== null) {
                 // Create forced input blocks from tests file. Only add to workspace if there is no workspace to load. If there
                 // was a workspace to load, they would be added twice.
@@ -346,10 +370,54 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
                 addBlockToWorkspace('start', nextblocksWorkspace);
             }
 
-            setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction);
+            // If page is a report page, lock all workspace blocks while still allowing comments
+            if (reportType !== 0) {
+                lockWorkspaceBlocks(nextblocksWorkspace);
+            }
+
+            setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction, reportType === 1);
         },
     };
 });
+
+/**
+ * Locks all blocks in a workspace, preventing them from being moved or deleted
+ * @param {WorkspaceSvg} workspace The workspace to lock
+ */
+const lockWorkspaceBlocks = function(workspace) {
+    workspace.getTopBlocks(false).forEach((block) => {
+        lockBlock(block);
+        lockChildren(block);
+    });
+
+    /**
+     * Recursively locks a block and all its children, preventing them from being moved or deleted
+     * @param {BlockSvg} block The block that will be locked and have its children locked
+     */
+    function lockChildren(block) {
+        block.getChildren(false).forEach((child) => {
+            lockBlock(child);
+
+            // Have to mess with internal Blockly stuff to block only the inputs while still allowing comments
+            child.inputList.forEach((input) => {
+                input.fieldRow.forEach((field) => {
+                    field.setEnabled(false);
+                });
+            });
+
+            lockChildren(child);
+        });
+    }
+
+    /**
+     * Locks a block, preventing it from being moved or deleted
+     * @param {BlockSvg} block The block that will be locked
+     */
+    function lockBlock(block) {
+        block.setMovable(false);
+        block.setDeletable(false);
+    }
+};
 
 // Makes background of image blue if it is not blue, and vice versa
 const changeImageBackground = function(img) {
@@ -415,14 +483,14 @@ const calcPercentages = (easy, medium, hard) => {
     return total === 0 ? [0, 0, 0] : [easy, medium, hard].map(val => Math.round((val / total) * 100));
 };
 
-const getOptions = function(remainingSubmissions) {
+const getOptions = function(remainingSubmissions, readOnly) {
     return {
-        toolbox: toolbox,
+        toolbox: readOnly ? null : toolbox,
         collapse: true,
         comments: true,
-        disable: true,
+        disable: false,
         maxBlocks: Infinity,
-        trashcan: true,
+        trashcan: !readOnly,
         horizontalLayout: false,
         toolboxPosition: 'start',
         css: true,
@@ -438,7 +506,7 @@ const getOptions = function(remainingSubmissions) {
             colour: '#888',
             snap: false,
         },
-        zoom: {
+        zoom: !readOnly ? null : {
             controls: true,
             wheel: true,
             startScale: 1,
@@ -618,7 +686,7 @@ Blockly.Blocks.start = {
 
 // eslint-disable-next-line no-unused-vars
 javascript.javascriptGenerator.forBlock.start = function(block, generator) {
-    // get all blocks attached to this block
+    // Get all blocks attached to this block
     let code = '';
     return code;
 };
@@ -706,3 +774,5 @@ class ToolboxLabel extends Blockly.ToolboxItem {
 Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, 'toolboxlabel', ToolboxLabel);
 
 Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCategory.registrationName, CustomCategory, true);
+
+// O problema é que, ao fazer save, estou a guardar o workspace do aluno na minha linha da base de dados, não na dele

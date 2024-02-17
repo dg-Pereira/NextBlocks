@@ -42,7 +42,7 @@ class mod_nextblocks_mod_form extends moodleform_mod {
      * @throws coding_exception
      */
     public function definition() {
-        global $CFG, $DB;
+        global $CFG;
 
         $mform = $this->_form;
 

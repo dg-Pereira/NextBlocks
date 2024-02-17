@@ -7,19 +7,36 @@ require_once(__DIR__ . '/lib.php');
 class mod_nextblocks_external extends external_api {
 
     //need to get the course module id because this does not run in the page
-    public static function save_workspace($nextblocksid, $saved_workspace) {
+    /**
+     * Saves the workspace of a user.
+     *
+     * @param int $nextblocksid Id of the nextblocks activity
+     * @param string $saved_workspace The workspace to be saved, in base64
+     * @param int    $userid          The id of the user that is saving the workspace.
+     *                                By default is not needed, and the current user is used.
+     *                                Only used when teacher is adding comments to user's workspace.
+     *
+     * @return void
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws invalid_parameter_exception
+     */
+    public static function save_workspace($nextblocksid, $saved_workspace, $userid=null) {
         global $DB, $USER;
+        if (!$userid) {
+            $userid = $USER->id;
+        }
         $params = self::validate_parameters(self::save_workspace_parameters(),
             array('nextblocksid' => $nextblocksid, 'saved_workspace' => $saved_workspace));
         $cm = get_coursemodule_from_id('nextblocks', $nextblocksid, 0, false, MUST_EXIST);
 
         //check if record exists
-        $record = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
+        $record = $DB->get_record('nextblocks_userdata', array('userid' => $userid, 'nextblocksid' => $cm->instance));
         //if record exists with same userid and nextblocksid, update it, else insert new record
         if ($record) {
-            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'saved_workspace' => $saved_workspace));
+            $DB->update_record('nextblocks_userdata', array('id' => $record->id, 'userid' => $userid, 'nextblocksid' => $cm->instance, 'saved_workspace' => $saved_workspace));
         } else {
-            $DB->insert_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance, 'saved_workspace' => $saved_workspace));
+            $DB->insert_record('nextblocks_userdata', array('userid' => $userid, 'nextblocksid' => $cm->instance, 'saved_workspace' => $saved_workspace));
         }
     }
 
@@ -29,6 +46,7 @@ class mod_nextblocks_external extends external_api {
             array(
                 'nextblocksid' => new external_value(PARAM_INT, 'module id'),
                 'saved_workspace' => new external_value(PARAM_RAW, 'workspace'),
+                'userid' => new external_value(PARAM_INT, 'user id', false)
             )
         );
     }
@@ -67,7 +85,7 @@ class mod_nextblocks_external extends external_api {
     }
 
     public static function auto_grade($cm, $codeString, $nextblocks, $tests_file) {
-        global $USER;
+        global $USER, $DB;
 
         $tests_file_contents = $tests_file->get_content();
 
@@ -82,6 +100,10 @@ class mod_nextblocks_external extends external_api {
         $grades->rawgrade = $newGrade;
 
         nextblocks_grade_item_update($nextblocks, $grades);
+
+        // update userdata with new grade
+        $userdata = $DB->get_record('nextblocks_userdata', array('userid' => $USER->id, 'nextblocksid' => $cm->instance));
+        $DB->update_record('nextblocks_userdata', array('id' => $userdata->id, 'userid' => $USER->id, 'nextblocksid' => $cm->instance, 'grade' => $newGrade));
     }
 
     public static function run_tests_jobe($tests, $codeString): int {

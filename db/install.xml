@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/nextblocks/db" VERSION="20240110" COMMENT="XMLDB file for Moodle mod_nextblocks"
+<XMLDB PATH="mod/nextblocks/db" VERSION="20240206" COMMENT="XMLDB file for Moodle mod_nextblocks"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -35,6 +35,7 @@
         <FIELD NAME="submitted_workspace" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Field for user submissions"/>
         <FIELD NAME="submissionnumber" TYPE="int" LENGTH="20" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Number of submissions that this user has done"/>
         <FIELD NAME="reacted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 if user has reacted to the exercise, 0 otherwise"/>
+        <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Current grade on exercise"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
