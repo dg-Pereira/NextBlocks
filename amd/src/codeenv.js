@@ -376,9 +376,84 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             }
 
             setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction, reportType === 1);
+
+            runChat();
         },
     };
 });
+
+const appendMessage = function(message) {
+    //const parsedMessage = parseMessage(message);
+    const chatDiv = document.getElementById('messages');
+    chatDiv.innerHTML += `<p>${message.text}</p>`;
+};
+
+const sendMessage = function(message, socket) {
+    socket.send(message);
+};
+
+const parseMessage = function(message) {
+    let msg = {type: "", sender: "", text: ""};
+    try {
+        msg = JSON.parse(message);
+    } catch (e) {
+        return false;
+    }
+    return msg;
+};
+
+const setup = function(socket) {
+    const msgForm = document.querySelector('form.msg-form');
+
+    // eslint-disable-next-line no-console
+    console.log(msgForm);
+
+    const msgFormSubmit = (event) => {
+        // eslint-disable-next-line no-console
+        console.log("Form submitted");
+        event.preventDefault();
+        const msgField = document.getElementById('msg');
+        const msgText = msgField.value;
+        let msg = {
+            type: "normal",
+            sender: "Browser",
+            text: msgText
+        };
+        msg = JSON.stringify(msg);
+        sendMessage(msg, socket);
+        msgField.value = '';
+    };
+
+    msgForm.addEventListener('submit', (event) => msgFormSubmit(event, socket));
+};
+
+const socketOpen = function(socket) {
+    // eslint-disable-next-line no-console
+    console.log("Socket opened");
+
+    const msg = {
+        type: 'join',
+        sender: 'Browser',
+        text: 'connected to the chat server'
+    };
+
+    appendMessage(JSON.stringify(msg.text));
+    setup(socket);
+};
+
+const socketMessage = function(event) {
+    // eslint-disable-next-line no-console
+    console.log(`Message from socket: ${event.data}`);
+    appendMessage(event.data);
+};
+
+const runChat = function() {
+    const socket = new WebSocket('ws://localhost:8060');
+
+    socket.addEventListener("open", () => socketOpen(socket));
+    socket.addEventListener("message", socketMessage);
+};
+
 
 /**
  * Locks all blocks in a workspace, preventing them from being moved or deleted
