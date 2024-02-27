@@ -93,7 +93,11 @@ if (has_capability('mod/nextblocks:gradeitems', context_module::instance($cm->id
 } else {
     $reportType = 2;
 }
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType]);
+
+$user = $DB->get_record('user', array('id' => $userid));
+$username = $user->firstname . ' ' . $user->lastname;
+
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType, $username, $id]);
 
 $PAGE->set_url('/mod/nextblocks/report.php', array('id' => $cm->id));
 $PAGE->set_title("Report " . format_string($moduleinstance->name));

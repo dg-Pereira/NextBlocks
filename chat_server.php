@@ -72,7 +72,21 @@ class Chat_Server {
                 // Handle incoming messages from clients
                 foreach ($reads as $key => $value) {
                     // Read message from the client
-                    $data = socket_read($value, 1024);
+                    $data = @socket_read($value, 1024); // Suppress warnings with @
+
+                    // Check if socket_read() failed
+                    if ($data === false) {
+                        $errorCode = socket_last_error();
+                        $errorMessage = socket_strerror($errorCode);
+
+                        echo "socket_read() failed: [$errorCode] $errorMessage\n";
+
+                        // Handle error (e.g., disconnect client, log error, etc.)
+                        echo "disconnecting client $key due to error\n";
+                        unset($connections[$key]);
+                        socket_close($value);
+                        continue;
+                    }
 
                     // If client sent a message
                     if (!empty($data)) {
@@ -91,9 +105,7 @@ class Chat_Server {
                         }
                     } else if ($data === '') { // If client closed the connection
                         echo "disconnecting client $key\n";
-                        // Remove client from the array of connections
                         unset($connections[$key]);
-                        // Close client socket
                         socket_close($value);
                     }
                 }
@@ -125,6 +137,12 @@ class Chat_Server {
 
         for ($i = 0; $i < strlen($data); ++$i) {
             $text .= $data[$i] ^ $masks[$i % 4];
+        }
+
+        // Check if the unmasked data is valid UTF-8
+        if (!mb_check_encoding($text, 'UTF-8')) {
+            // Handle error: $cdtext is not valid UTF-8
+            return "";
         }
 
         return $text;

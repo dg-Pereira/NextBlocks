@@ -287,8 +287,11 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          * (0 = no reaction, 1 = easy, 2 = medium, 3 = hard).
          * @param {number} reportType Indicates the type of report to be displayed (0 = no report, 1 = teacher report,
          * 2 = student report).
+         * @param {string} userName The name of the user that loaded the page.
+         * @param {number} activityId The id of the activity
          */
-        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction, reportType = 0) {
+        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction, reportType = 0,
+                       userName, activityId) {
             // If report is student but he can still submit, change to no report so he can use the workspace
             if (reportType === 2 && remainingSubmissions > 0) {
                 reportType = 0;
@@ -377,15 +380,17 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
             setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction, reportType === 1);
 
-            runChat();
+            runChat(userName, activityId);
         },
     };
 });
 
-const appendMessage = function(message) {
-    //const parsedMessage = parseMessage(message);
-    const chatDiv = document.getElementById('messages');
-    chatDiv.innerHTML += `<p>${message.text}</p>`;
+const appendMessage = function(message, activityId) {
+    const parsedMessage = parseMessage(message);
+    if (activityId === parsedMessage.activity) {
+        const chatDiv = document.getElementById('messages');
+        chatDiv.innerHTML += `<p>(Activity ${parsedMessage.activity}) ${parsedMessage.sender}: ${parsedMessage.text}</p>`;
+    }
 };
 
 const sendMessage = function(message, socket) {
@@ -393,7 +398,7 @@ const sendMessage = function(message, socket) {
 };
 
 const parseMessage = function(message) {
-    let msg = {type: "", sender: "", text: ""};
+    let msg = {type: "", sender: "", text: "", activity: ""};
     try {
         msg = JSON.parse(message);
     } catch (e) {
@@ -402,22 +407,18 @@ const parseMessage = function(message) {
     return msg;
 };
 
-const setup = function(socket) {
+const chatSetup = function(socket, userName, activityId) {
     const msgForm = document.querySelector('form.msg-form');
 
-    // eslint-disable-next-line no-console
-    console.log(msgForm);
-
     const msgFormSubmit = (event) => {
-        // eslint-disable-next-line no-console
-        console.log("Form submitted");
         event.preventDefault();
         const msgField = document.getElementById('msg');
         const msgText = msgField.value;
         let msg = {
             type: "normal",
-            sender: "Browser",
-            text: msgText
+            sender: userName,
+            text: msgText,
+            activity: activityId
         };
         msg = JSON.stringify(msg);
         sendMessage(msg, socket);
@@ -427,31 +428,10 @@ const setup = function(socket) {
     msgForm.addEventListener('submit', (event) => msgFormSubmit(event, socket));
 };
 
-const socketOpen = function(socket) {
-    // eslint-disable-next-line no-console
-    console.log("Socket opened");
-
-    const msg = {
-        type: 'join',
-        sender: 'Browser',
-        text: 'connected to the chat server'
-    };
-
-    appendMessage(JSON.stringify(msg.text));
-    setup(socket);
-};
-
-const socketMessage = function(event) {
-    // eslint-disable-next-line no-console
-    console.log(`Message from socket: ${event.data}`);
-    appendMessage(event.data);
-};
-
-const runChat = function() {
+const runChat = function(userName, activityId) {
     const socket = new WebSocket('ws://localhost:8060');
-
-    socket.addEventListener("open", () => socketOpen(socket));
-    socket.addEventListener("message", socketMessage);
+    socket.addEventListener("open", () => chatSetup(socket, userName, activityId));
+    socket.addEventListener("message", (event) => appendMessage(event.data, activityId));
 };
 
 
