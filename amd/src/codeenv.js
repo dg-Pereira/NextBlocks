@@ -298,6 +298,8 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             }
             updatePercentages(reactions[0], reactions[1], reactions[2]);
 
+            populateChat(repository, activityId);
+
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
 
@@ -380,16 +382,31 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
             setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction, reportType === 1);
 
-            runChat(userName, activityId);
+            runChat(userName, activityId, repository);
         },
     };
 });
 
-const appendMessage = function(message, activityId) {
-    const parsedMessage = parseMessage(message);
-    if (activityId === parsedMessage.activity) {
+const populateChat = function(repository, activityId) {
+    // Get last 100 messages from database
+    const messagesPromise = repository.getMessages(100, activityId);
+
+    messagesPromise.then((messages) => {
+        // Add messages to chat box
+        messages.forEach((dbMessage) => {
+            const message = {type: "dbMessage", sender: dbMessage.username, text: dbMessage.message, activity: activityId};
+            appendMessage(message, activityId, true);
+        });
+    });
+};
+
+const appendMessage = function(message, activityId, isParsed = false) {
+    if (!isParsed) {
+        message = parseMessage(message);
+    }
+    if (activityId === message.activity) {
         const chatDiv = document.getElementById('messages');
-        chatDiv.innerHTML += `<p>(Activity ${parsedMessage.activity}) ${parsedMessage.sender}: ${parsedMessage.text}</p>`;
+        chatDiv.innerHTML += `<p>(Activity ${message.activity}) ${message.sender}: ${message.text}</p>`;
     }
 };
 
@@ -407,13 +424,19 @@ const parseMessage = function(message) {
     return msg;
 };
 
-const chatSetup = function(socket, userName, activityId) {
+const chatSetup = function(socket, userName, activityId, repository) {
     const msgForm = document.querySelector('form.msg-form');
 
     const msgFormSubmit = (event) => {
         event.preventDefault();
         const msgField = document.getElementById('msg');
         const msgText = msgField.value;
+
+        // Store message in database. Ajax is asynchronous, so it might be faster to execute this before sending the message
+        // eslint-disable-next-line no-console
+        repository.saveMessage(msgText, userName, activityId, Date.now());
+
+        // Prepare and send message to websocket
         let msg = {
             type: "normal",
             sender: userName,
@@ -428,12 +451,11 @@ const chatSetup = function(socket, userName, activityId) {
     msgForm.addEventListener('submit', (event) => msgFormSubmit(event, socket));
 };
 
-const runChat = function(userName, activityId) {
+const runChat = function(userName, activityId, repository) {
     const socket = new WebSocket('ws://localhost:8060');
-    socket.addEventListener("open", () => chatSetup(socket, userName, activityId));
+    socket.addEventListener("open", () => chatSetup(socket, userName, activityId, repository));
     socket.addEventListener("message", (event) => appendMessage(event.data, activityId));
 };
-
 
 /**
  * Locks all blocks in a workspace, preventing them from being moved or deleted
