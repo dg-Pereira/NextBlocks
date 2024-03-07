@@ -50,3 +50,51 @@
 .border {
     border: 1px solid #000;
 }
+
+
+.chat {
+    box-sizing: border-box;
+}
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.chat-container {
+    position: relative;
+}
+
+.messages {
+    height: 300px;
+    width: 500px;
+    border: 2px solid #ccc;
+    border-radius: 3px;
+    padding: 1em;
+    overflow: scroll;
+}
+
+.msg {
+    margin-bottom: 5px;
+}
+.msg-text {
+    padding: 5px;
+    display: inline-block;
+    border-radius: 5px;
+}
+.msg-normal .msg-text {
+    background: rgb(39, 112, 215);
+    color: white;
+}
+
+.msg-notification .msg-text,
+.msg-join .msg-text,
+.msg-left .msg-text {
+    background: #eee;
+    border: 1px solid #ccc;
+}
+
+.msg-notification .msg-sender,
+.msg-join .msg-sender,
+.msg-left .msg-sender {
+    display: none;
+}

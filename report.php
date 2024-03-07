@@ -93,7 +93,11 @@ if (has_capability('mod/nextblocks:gradeitems', context_module::instance($cm->id
 } else {
     $reportType = 2;
 }
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType]);
+
+$user = $DB->get_record('user', array('id' => $userid));
+$username = $user->firstname . ' ' . $user->lastname;
+
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType, $username, $id]);
 
 $PAGE->set_url('/mod/nextblocks/report.php', array('id' => $cm->id));
 $PAGE->set_title("Report " . format_string($moduleinstance->name));
@@ -108,22 +112,17 @@ $runTestsButton = $tests_file ? '<input id="runTestsButton" type="submit" class=
 $mform = new grade_submit();
 
 if($data = $mform->get_data()) {
-    //This is where you can process the $data you get from the form
-    error_log('test2', 3, "C:\wamp64\logs\php_error.log");
-
-    //update grade
 
     $grades = new stdClass();
     $grades->userid = $userid;
-    $grades->rawgrade = $data->newgrade; // ir buscar o que está no form
+    $grades->rawgrade = $data->newgrade; // Fetch new grade from form
 
-    nextblocks_grade_item_update($moduleinstance, $grades);
+    nextblocks_grade_item_update($moduleinstance, $grades); // Update grade in gradebook
 
-    //update grade in nextblocks_userdata
+    //update grade in database
     $record->grade = $data->newgrade;
     $DB->update_record('nextblocks_userdata', $record);
 
-    //redirect(new moodle_url('/nextblocks/report.php', array('id' => $moduleinstance->course)), 'Cancelled');
     redirect(new moodle_url($PAGE->url, array('id' => $id, 'userid' => $userid)), 'Grade Updated');
 } else {
     $graderForm = $mform->render();

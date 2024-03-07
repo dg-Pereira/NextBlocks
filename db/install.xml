@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/nextblocks/db" VERSION="20240206" COMMENT="XMLDB file for Moodle mod_nextblocks"
+<XMLDB PATH="mod/nextblocks/db" VERSION="20240301" COMMENT="XMLDB file for Moodle mod_nextblocks"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -53,6 +53,19 @@
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
         <KEY NAME="nextblocksid" TYPE="foreign" FIELDS="nextblocksid" REFTABLE="mdl_nextblocks" REFFIELDS="id" COMMENT="Id of the exercise to which this custom block belongs"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="nextblocks_messages" COMMENT="All messages in the nextblocks chat">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="nextblocksid" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Id of the nextblocks activity where this message was posted"/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="The message that was sent"/>
+        <FIELD NAME="timestamp" TYPE="int" LENGTH="20" NOTNULL="true" SEQUENCE="false" COMMENT="Timestamp of when the message was sent"/>
+        <FIELD NAME="username" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="name of the user who sent the message"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="nextblocksid" TYPE="foreign" FIELDS="nextblocksid" REFTABLE="nextblocks" REFFIELDS="id" COMMENT="the activity to which this message was posted"/>
       </KEYS>
     </TABLE>
   </TABLES>

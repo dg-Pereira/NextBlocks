@@ -37,6 +37,28 @@ define(['core/ajax'], function(ajax) {
                     reaction: reaction,
                 },
             }])[0];
+        },
+
+        saveMessage: function(message, userName, nextblocksId, timestamp) {
+            return ajax.call([{
+                methodname: 'mod_nextblocks_save_message',
+                args: {
+                    message: message,
+                    userName: userName,
+                    nextblocksId: nextblocksId,
+                    timestamp: timestamp,
+                },
+            }])[0];
+        },
+
+        getMessages: function(messageCount, nextblocksId) {
+            return ajax.call([{
+                methodname: 'mod_nextblocks_get_messages',
+                args: {
+                    messageCount: messageCount,
+                    nextblocksId: nextblocksId,
+                },
+            }])[0];
         }
     };
 });

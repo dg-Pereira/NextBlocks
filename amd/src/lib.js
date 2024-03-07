@@ -89,7 +89,7 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
 
         /**
          * Inserts the test results accordion in the area above the Run and Tests buttons
-         * @param {any[]|null} results the results of the tests (pass/fail)
+         * @param {any[]|null} results the outputs of the tests
          * @param {{}} testsJSON the tests that were run (for displaying the inputs and outputs)
          * @param {String[]} uncalledInputFuncs the input functions that were not called.
          * Note: if this is not empty, results is null
@@ -174,8 +174,7 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
                 });
                 let codeOutput = this.silentRunCode(thisTestCode);
                 codeOutput = codeOutput.replace(/\s/g, '');
-                const result = codeOutput;
-                results.push(result);
+                results.push(codeOutput);
             });
             return results;
         },
@@ -223,8 +222,7 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
                 const block = blocks[b];
                 if (block.type === 'start') {
                     codeString.addMainCode(generateDescendantsCode(block));
-                }
-                if (block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn') {
+                } else if (block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn') {
                     codeString.addFunction(generateFunctionCode(block));
                 }
             }

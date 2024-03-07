@@ -287,13 +287,18 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
          * (0 = no reaction, 1 = easy, 2 = medium, 3 = hard).
          * @param {number} reportType Indicates the type of report to be displayed (0 = no report, 1 = teacher report,
          * 2 = student report).
+         * @param {string} userName The name of the user that loaded the page.
+         * @param {number} activityId The id of the activity
          */
-        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction, reportType = 0) {
+        init: function(contents, loadedSave, customBlocks, remainingSubmissions, reactions, lastUserReaction, reportType = 0,
+                       userName, activityId) {
             // If report is student but he can still submit, change to no report so he can use the workspace
             if (reportType === 2 && remainingSubmissions > 0) {
                 reportType = 0;
             }
             updatePercentages(reactions[0], reactions[1], reactions[2]);
+
+            populateChat(repository, activityId);
 
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
@@ -376,9 +381,87 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             }
 
             setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction, reportType === 1);
+
+            runChat(userName, activityId, repository);
         },
     };
 });
+
+const populateChat = function(repository, activityId) {
+    // Get last 100 messages from database
+    const messagesPromise = repository.getMessages(100, activityId);
+
+    messagesPromise.then((messages) => {
+        // Add messages to chat box
+        messages.forEach((dbMessage) => {
+            const message = {type: "dbMessage", sender: dbMessage.username, text: dbMessage.message, activity: activityId,
+                timestamp: dbMessage.timestamp};
+            appendMessage(message, activityId, true);
+        });
+    });
+};
+
+const appendMessage = function(message, activityId, isParsed = false) {
+    // eslint-disable-next-line no-console
+    console.log(message);
+    if (!isParsed) {
+        message = parseMessage(message);
+    }
+    if (activityId === message.activity) {
+        const chatDiv = document.getElementById('messages');
+        chatDiv.innerHTML += `<p>(${new Date(message.timestamp).getHours()}:${new Date(message.timestamp).getMinutes()}) 
+            ${message.sender}: ${message.text}</p>`;
+    }
+};
+
+const sendMessage = function(message, socket) {
+    socket.send(message);
+};
+
+const parseMessage = function(message) {
+    let msg = {type: "", sender: "", text: "", activity: ""};
+    try {
+        msg = JSON.parse(message);
+    } catch (e) {
+        return false;
+    }
+    return msg;
+};
+
+const chatSetup = function(socket, userName, activityId, repository) {
+    const msgForm = document.querySelector('form.msg-form');
+
+    const msgFormSubmit = (event) => {
+        event.preventDefault();
+        const msgField = document.getElementById('msg');
+        const msgText = msgField.value;
+        const timestamp = Date.now();
+
+        // Store message in database. Ajax is asynchronous, so it might be faster to execute this before sending the message
+        // eslint-disable-next-line no-console
+        repository.saveMessage(msgText, userName, activityId, timestamp);
+
+        // Prepare and send message to websocket
+        let msg = {
+            type: "normal",
+            sender: userName,
+            text: msgText,
+            activity: activityId,
+            timestamp: timestamp
+        };
+        msg = JSON.stringify(msg);
+        sendMessage(msg, socket);
+        msgField.value = '';
+    };
+
+    msgForm.addEventListener('submit', (event) => msgFormSubmit(event, socket));
+};
+
+const runChat = function(userName, activityId, repository) {
+    const socket = new WebSocket('ws://localhost:8060');
+    socket.addEventListener("open", () => chatSetup(socket, userName, activityId, repository));
+    socket.addEventListener("message", (event) => appendMessage(event.data, activityId));
+};
 
 /**
  * Locks all blocks in a workspace, preventing them from being moved or deleted

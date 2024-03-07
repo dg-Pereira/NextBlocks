@@ -274,4 +274,64 @@ class mod_nextblocks_external extends external_api {
             )
         );
     }
+
+    public static function save_message($message, $userName, $nextblocksId, $timestamp) {
+        global $DB;
+        $params = self::validate_parameters(self::save_message_parameters(),
+            array('message' => $message, 'userName' => $userName, 'nextblocksId' => $nextblocksId, 'timestamp' => $timestamp));
+        $DB->insert_record('nextblocks_messages', array('message' => $message, 'username' => $userName, 'nextblocksid' => $nextblocksId, 'timestamp' => $timestamp));
+    }
+
+    public static function save_message_parameters() {
+        return new external_function_parameters(
+            array(
+                'message' => new external_value(PARAM_TEXT, 'message sent'),
+                'userName' => new external_value(PARAM_TEXT, 'name of the user who sent the message'),
+                'nextblocksId' => new external_value(PARAM_INT, 'id of the activity where the message was sent'),
+                'timestamp' => new external_value(PARAM_INT, 'when the message was sent (UNIX time)'),
+            )
+        );
+    }
+
+    public static function save_message_returns() {
+        return null;
+    }
+
+    public static function get_messages($messageCount, $nextblocksId){
+        global $DB;
+        $params = self::validate_parameters(self::get_messages_parameters(),
+            array('messageCount' => $messageCount, 'nextblocksId' => $nextblocksId));
+        $messages = $DB->get_records('nextblocks_messages', array('nextblocksid' => $nextblocksId), 'timestamp ASC', '*', 0, $messageCount);
+        $messagesArray = array();
+        foreach ($messages as $message) {
+            $messageArray = array(
+                'message' => $message->message,
+                'username' => $message->username,
+                'timestamp' => $message->timestamp
+            );
+            $messagesArray[] = $messageArray;
+        }
+        return $messagesArray;
+    }
+
+    public static function get_messages_parameters() {
+        return new external_function_parameters(
+            array(
+                'messageCount' => new external_value(PARAM_INT, 'number of messages to get'),
+                'nextblocksId' => new external_value(PARAM_INT, 'id of the activity where the messages were sent'),
+            )
+        );
+    }
+
+    public static function get_messages_returns() {
+        return new external_multiple_structure(
+            new external_single_structure(
+                array(
+                    'message' => new external_value(PARAM_TEXT, 'message sent'),
+                    'username' => new external_value(PARAM_TEXT, 'name of the user who sent the message'),
+                    'timestamp' => new external_value(PARAM_INT, 'when the message was sent (UNIX time)'),
+                )
+            )
+        );
+    }
 }
