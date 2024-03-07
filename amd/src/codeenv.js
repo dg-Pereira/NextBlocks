@@ -200,7 +200,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository', 'mod_nextblocks/chat'
         const runButton = document.getElementById('runButton');
         runButton.addEventListener('click', function() {
             const code = lib.getWorkspaceCode(workspace, inputFuncDecs);
-            lib.replaceCode(code);
+            //lib.replaceCode(code);
             runCode(code);
         });
 
@@ -271,6 +271,45 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository', 'mod_nextblocks/chat'
                         changeImageBackground(img);
                     });
                 });
+            }
+        });
+
+        const textCodeButton = document.getElementById('showCodeButton');
+        let codeVisible = false; // Variable to track the visibility state
+        let overlayDiv; // Variable to store the overlay div
+
+        textCodeButton.addEventListener('click', () => {
+            const blocklyArea = document.getElementById('blocklyArea');
+            const codeString = lib.getWorkspaceCode(workspace, inputFuncDecs).getPrintableCodeString().replace(/\n/g, "<br />");
+
+            // Get the padding of the blocklyArea
+            const paddingLeft = parseInt(window.getComputedStyle(blocklyArea).getPropertyValue('padding-left'));
+            const paddingRight = parseInt(window.getComputedStyle(blocklyArea).getPropertyValue('padding-right'));
+
+            if (codeVisible) {
+                // If the code is currently visible, hide it
+                overlayDiv.style.display = 'none';
+                codeVisible = false;
+            } else {
+                // If the code is currently hidden, show it
+                if (!overlayDiv) {
+                    // If the overlay div doesn't exist, create it
+                    overlayDiv = document.createElement('div');
+                    overlayDiv.style.position = 'absolute';
+                    overlayDiv.style.top = '0';
+                    overlayDiv.style.left = `${paddingLeft}px`;
+                    overlayDiv.style.width = `calc(100% - ${paddingLeft + paddingRight}px)`;
+                    overlayDiv.style.height = '100%';
+                    overlayDiv.style.backgroundColor = '#f9f9f9';
+                    overlayDiv.style.border = '1px solid #ddd';
+                    overlayDiv.style.padding = '10px';
+                    overlayDiv.style.fontFamily = '"Lucida Console", "Courier New", monospace';
+                    overlayDiv.style.zIndex = '1000';
+                    blocklyArea.appendChild(overlayDiv);
+                }
+                overlayDiv.innerHTML = codeString;
+                overlayDiv.style.display = 'block';
+                codeVisible = true;
             }
         });
     }
@@ -371,7 +410,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository', 'mod_nextblocks/chat'
             // Load the save, if there is one
             if (loadedSave !== null) {
                 loadSave(loadedSave, nextblocksWorkspace);
-            } else {
+            } else { // Otherwise, add the start block
                 addBlockToWorkspace('start', nextblocksWorkspace);
             }
 
