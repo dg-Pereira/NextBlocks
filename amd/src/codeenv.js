@@ -126,7 +126,7 @@ let toolbox = {
 // GetMainWorkspace might remove need for global variable
 let nextblocksWorkspace;
 
-define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, repository) {
+define(['mod_nextblocks/lib', 'mod_nextblocks/repository', 'mod_nextblocks/chat'], function(lib, repository, chat) {
     /**
      * @param {CodeString} code The Javascript code to be run
      * Runs the code and displays the output in the output div
@@ -298,7 +298,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
             }
             updatePercentages(reactions[0], reactions[1], reactions[2]);
 
-            populateChat(repository, activityId);
+            chat.populateChat(repository, activityId);
 
             const blocklyDiv = document.getElementById('blocklyDiv');
             const blocklyArea = document.getElementById('blocklyArea');
@@ -382,86 +382,10 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository'], function(lib, reposi
 
             setupButtons(tests, nextblocksWorkspace, inputFunctionDeclarations.funcDecs, lastUserReaction, reportType === 1);
 
-            runChat(userName, activityId, repository);
+            chat.runChat(userName, activityId, repository);
         },
     };
 });
-
-const populateChat = function(repository, activityId) {
-    // Get last 100 messages from database
-    const messagesPromise = repository.getMessages(100, activityId);
-
-    messagesPromise.then((messages) => {
-        // Add messages to chat box
-        messages.forEach((dbMessage) => {
-            const message = {type: "dbMessage", sender: dbMessage.username, text: dbMessage.message, activity: activityId,
-                timestamp: dbMessage.timestamp};
-            appendMessage(message, activityId, true);
-        });
-    });
-};
-
-const appendMessage = function(message, activityId, isParsed = false) {
-    // eslint-disable-next-line no-console
-    console.log(message);
-    if (!isParsed) {
-        message = parseMessage(message);
-    }
-    if (activityId === message.activity) {
-        const chatDiv = document.getElementById('messages');
-        chatDiv.innerHTML += `<p>(${new Date(message.timestamp).getHours()}:${new Date(message.timestamp).getMinutes()}) 
-            ${message.sender}: ${message.text}</p>`;
-    }
-};
-
-const sendMessage = function(message, socket) {
-    socket.send(message);
-};
-
-const parseMessage = function(message) {
-    let msg = {type: "", sender: "", text: "", activity: ""};
-    try {
-        msg = JSON.parse(message);
-    } catch (e) {
-        return false;
-    }
-    return msg;
-};
-
-const chatSetup = function(socket, userName, activityId, repository) {
-    const msgForm = document.querySelector('form.msg-form');
-
-    const msgFormSubmit = (event) => {
-        event.preventDefault();
-        const msgField = document.getElementById('msg');
-        const msgText = msgField.value;
-        const timestamp = Date.now();
-
-        // Store message in database. Ajax is asynchronous, so it might be faster to execute this before sending the message
-        // eslint-disable-next-line no-console
-        repository.saveMessage(msgText, userName, activityId, timestamp);
-
-        // Prepare and send message to websocket
-        let msg = {
-            type: "normal",
-            sender: userName,
-            text: msgText,
-            activity: activityId,
-            timestamp: timestamp
-        };
-        msg = JSON.stringify(msg);
-        sendMessage(msg, socket);
-        msgField.value = '';
-    };
-
-    msgForm.addEventListener('submit', (event) => msgFormSubmit(event, socket));
-};
-
-const runChat = function(userName, activityId, repository) {
-    const socket = new WebSocket('ws://localhost:8060');
-    socket.addEventListener("open", () => chatSetup(socket, userName, activityId, repository));
-    socket.addEventListener("message", (event) => appendMessage(event.data, activityId));
-};
 
 /**
  * Locks all blocks in a workspace, preventing them from being moved or deleted
