@@ -394,19 +394,23 @@ const populateChat = function(repository, activityId) {
     messagesPromise.then((messages) => {
         // Add messages to chat box
         messages.forEach((dbMessage) => {
-            const message = {type: "dbMessage", sender: dbMessage.username, text: dbMessage.message, activity: activityId};
+            const message = {type: "dbMessage", sender: dbMessage.username, text: dbMessage.message, activity: activityId,
+                timestamp: dbMessage.timestamp};
             appendMessage(message, activityId, true);
         });
     });
 };
 
 const appendMessage = function(message, activityId, isParsed = false) {
+    // eslint-disable-next-line no-console
+    console.log(message);
     if (!isParsed) {
         message = parseMessage(message);
     }
     if (activityId === message.activity) {
         const chatDiv = document.getElementById('messages');
-        chatDiv.innerHTML += `<p>(Activity ${message.activity}) ${message.sender}: ${message.text}</p>`;
+        chatDiv.innerHTML += `<p>(${new Date(message.timestamp).getHours()}:${new Date(message.timestamp).getMinutes()}) 
+            ${message.sender}: ${message.text}</p>`;
     }
 };
 
@@ -431,17 +435,19 @@ const chatSetup = function(socket, userName, activityId, repository) {
         event.preventDefault();
         const msgField = document.getElementById('msg');
         const msgText = msgField.value;
+        const timestamp = Date.now();
 
         // Store message in database. Ajax is asynchronous, so it might be faster to execute this before sending the message
         // eslint-disable-next-line no-console
-        repository.saveMessage(msgText, userName, activityId, Date.now());
+        repository.saveMessage(msgText, userName, activityId, timestamp);
 
         // Prepare and send message to websocket
         let msg = {
             type: "normal",
             sender: userName,
             text: msgText,
-            activity: activityId
+            activity: activityId,
+            timestamp: timestamp
         };
         msg = JSON.stringify(msg);
         sendMessage(msg, socket);

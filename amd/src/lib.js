@@ -222,8 +222,7 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
                 const block = blocks[b];
                 if (block.type === 'start') {
                     codeString.addMainCode(generateDescendantsCode(block));
-                }
-                if (block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn') {
+                } else if (block.type === 'procedures_defnoreturn' || block.type === 'procedures_defreturn') {
                     codeString.addFunction(generateFunctionCode(block));
                 }
             }
