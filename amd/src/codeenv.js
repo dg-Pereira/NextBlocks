@@ -200,7 +200,7 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository', 'mod_nextblocks/chat'
         const runButton = document.getElementById('runButton');
         runButton.addEventListener('click', function() {
             const code = lib.getWorkspaceCode(workspace, inputFuncDecs);
-            //lib.replaceCode(code);
+            // Lib.replaceCode(code);
             runCode(code);
         });
 
