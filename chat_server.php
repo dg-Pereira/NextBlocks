@@ -1,4 +1,9 @@
 <?php
+
+/**
+ * Based on https://github.com/iabhinavr/php-socket-chat
+ * and RFC 6455: https://datatracker.ietf.org/doc/html/rfc6455
+ */
 class Chat_Server {
 
     private $address;
@@ -59,11 +64,6 @@ class Chat_Server {
                     // Add new connection to connection array
                     $connections[] = $new_connection;
 
-                    // Send message to new client
-                    $reply = "new connection\n";
-                    $reply = $this->pack_data($reply);
-                    socket_write($new_connection, $reply, strlen($reply));
-
                     // Remove main socket from the $reads array for this iteration
                     $sock_index = array_search($sock, $reads);
                     unset($reads[$sock_index]);
@@ -72,7 +72,7 @@ class Chat_Server {
                 // Handle incoming messages from clients
                 foreach ($reads as $key => $value) {
                     // Read message from the client
-                    $data = @socket_read($value, 1024); // Suppress warnings with @
+                    $data = @socket_read($value, 1024);
 
                     // Check if socket_read() failed
                     if ($data === false) {
@@ -122,7 +122,7 @@ class Chat_Server {
             // Handle error: $text is too short
             return "";
         }
-        $length = ord($text[1]) & 127;
+        $length = @ord($text[1]) & 127; // converts 8-bit to 7-bit, because payload length is 7-bit
         if ($length == 126) {
             $masks = substr($text, 4, 4);
             $data = substr($text, 8);
