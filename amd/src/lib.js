@@ -51,21 +51,6 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
         return functionNames;
     }
 
-    /**
-     * Formats the code with correct HTML structure to be displayed in the code div
-     * TODO: implement this function
-     * @param {CodeString} code the code text to be formatted (string literal)
-     * @param {boolean} debugMode whether to display the code as is, or with the wrapper function
-     * @returns {string} the formatted code
-     */
-    const formatCodeHTML = (code, debugMode = true) => {
-        if (!debugMode) {
-            return '<pre>' + code.getPrintableCodeString() + '</pre>';
-        } else {
-            return '<pre>' + code.getCompleteCodeString() + '</pre>';
-        }
-    };
-
     return {
         /**
          * @param {String} code The Javascript code to be run
@@ -79,12 +64,18 @@ define(['mod_nextblocks/codestring'], function(CodeString) {
         },
 
         /**
-         * Inserts the new program code in the code div below the blockly area, replacing the old one if it exists
-         * @param {CodeString} code the new program code to be displayed
+         * Formats the code with correct HTML structure to be displayed in the code div
+         * TODO: implement this function
+         * @param {CodeString} code the code text to be formatted (string literal)
+         * @param {boolean} debugMode whether to display the code as is, or with the wrapper function
+         * @returns {string} the formatted code
          */
-        replaceCode: function(code) {
-            const codeDiv = document.getElementById('codeDiv');
-            codeDiv.innerHTML = formatCodeHTML(code);
+        formatCodeHTML: (code, debugMode = false) => {
+            if (!debugMode) {
+                return '<pre>' + code.getPrintableCodeString() + '</pre>';
+            } else {
+                return '<pre>' + code.getCompleteCodeString() + '</pre>';
+            }
         },
 
         /**

@@ -92,6 +92,13 @@ class Chat_Server {
                     if (!empty($data)) {
                         // Unmask message
                         $message = $this->unmask($data);
+
+                        // Skip invalid JSON. when the client disconnects sometimes a bit of junk is sent, which is not valid JSON
+                        json_decode($message);
+                        if (json_last_error() === JSON_ERROR_SYNTAX){
+                            continue;
+                        }
+
                         // Pack message for sending
                         $packed_message = $this->pack_data($message);
 

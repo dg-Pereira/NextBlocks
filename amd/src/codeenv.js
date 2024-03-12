@@ -276,11 +276,11 @@ define(['mod_nextblocks/lib', 'mod_nextblocks/repository', 'mod_nextblocks/chat'
 
         const textCodeButton = document.getElementById('showCodeButton');
         let codeVisible = false; // Variable to track the visibility state
-        let overlayDiv; // Variable to store the overlay div
+        let overlayDiv;
 
         textCodeButton.addEventListener('click', () => {
             const blocklyArea = document.getElementById('blocklyArea');
-            const codeString = lib.getWorkspaceCode(workspace, inputFuncDecs).getPrintableCodeString().replace(/\n/g, "<br />");
+            const codeString = lib.formatCodeHTML(lib.getWorkspaceCode(workspace, inputFuncDecs)).replace(/\n/g, "<br />");
 
             // Get the padding of the blocklyArea
             const paddingLeft = parseInt(window.getComputedStyle(blocklyArea).getPropertyValue('padding-left'));

@@ -18,8 +18,8 @@ define([], function() {
             const socket = new WebSocket(serverUrl);
             socket.addEventListener("open", () => chatSetup(socket, userName, activityId, saveMessage));
             socket.addEventListener("message", (event) => appendMessage(event.data, activityId));
-            socket.addEventListener("close", () => socketError(activityId, "Connection closed by server"));
-            socket.addEventListener("error", () => socketError(activityId));
+            //socket.addEventListener("close", () => socketError(activityId, "Connection closed by server"));
+            //socket.addEventListener("error", () => socketError(activityId));
         },
 
         /**
@@ -43,6 +43,7 @@ define([], function() {
     };
 });
 
+// eslint-disable-next-line no-unused-vars
 const socketError = function(activityId, errorMessage = "Connection error") {
     const errorJSON = {type: "error", sender: "System", text: errorMessage, activity: activityId, timestamp: Date.now()};
     appendMessage(errorJSON, activityId, true);
@@ -57,11 +58,13 @@ const socketError = function(activityId, errorMessage = "Connection error") {
  */
 const appendMessage = function(message, activityId, isParsed = false) {
     if (!isParsed) {
+        // eslint-disable-next-line no-console
+        console.log(message);
         message = parseMessage(message);
     }
     if (activityId === message.activity) {
         const chatDiv = document.getElementById('messages');
-        const timestampDate = new Date(message.activity);
+        const timestampDate = new Date(message.timestamp);
         chatDiv.innerHTML += `<p>(${timestampDate.getHours()}:${timestampDate.getMinutes()}) 
             ${message.sender}: ${message.text}</p>`;
     }

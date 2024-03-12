@@ -12,9 +12,9 @@ export const init = (activityId) => {
         const userId = row.getAttribute('id').split("=")[1];
 
 
-        //change row href to report.php
+        // Change row href to report.php
         row.href = `report.php?id=${activityId}&userid=${userId}`;
 
-        //window.location.replace("../report.php?id=" + id + "&userid=" + userid);
+        // Window.location.replace("../report.php?id=" + id + "&userid=" + userid);
     }
 };
