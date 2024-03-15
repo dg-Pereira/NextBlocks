@@ -157,6 +157,7 @@ class mod_nextblocks_external extends external_api {
          * Run docker container first
          */
     public static function run_test_jobe($codeString){
+        //remember that the docker container must be running on port 4000
         $url = 'http://localhost:4000/jobe/index.php/restapi/runs/';
         $data = [
             "run_spec" => [

@@ -1,3 +1,5 @@
 add support for updating plugin without reinstalling
 
-add timestamps to message in chat box
+in reportt, if teacher sends message, it shows up as student
+
+workspace getting locked after submission when it shouldn't?

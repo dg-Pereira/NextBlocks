@@ -795,30 +795,4 @@ class CustomCategory extends Blockly.ToolboxCategory {
     }
 }
 
-class ToolboxLabel extends Blockly.ToolboxItem {
-    constructor(toolboxItemDef, parentToolbox) {
-        super(toolboxItemDef, parentToolbox);
-    }
-
-    /** @override */
-    init() {
-        // Create the label.
-        this.label = document.createElement('label');
-
-        // Set the name.
-        this.label.textContent = this.toolboxItemDef_.name;
-        // Set the color.
-        this.label.style.color = this.toolboxItemDef_.colour;
-    }
-
-    /** @override */
-    getDiv() {
-        return this.label;
-    }
-}
-
-Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, 'toolboxlabel', ToolboxLabel);
-
 Blockly.registry.register(Blockly.registry.Type.TOOLBOX_ITEM, Blockly.ToolboxCategory.registrationName, CustomCategory, true);
-
-// O problema é que, ao fazer save, estou a guardar o workspace do aluno na minha linha da base de dados, não na dele
