@@ -13,11 +13,11 @@ let toolbox = {
     'kind': 'categoryToolbox',
     'readOnly': true,
     'contents': [
-        {
-            'kind': 'toolboxlabel',
-            'name': 'NextBlocks',
-            'colour': 'darkslategrey'
-        },
+        //{
+        //    'kind': 'toolboxlabel',
+        //    'name': 'NextBlocks',
+        //    'colour': 'darkslategrey'
+        //},
         {
             'kind': 'category',
             'name': 'Logic',
