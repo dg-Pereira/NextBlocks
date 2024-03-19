@@ -748,7 +748,7 @@ const getOptions = function(remainingSubmissions, readOnly) {
             colour: '#888',
             snap: false,
         },
-        zoom: !readOnly ? null : {
+        zoom: {
             controls: true,
             wheel: true,
             startScale: 1,

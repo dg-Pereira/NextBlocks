@@ -53,7 +53,7 @@ $modulecontext = context_module::instance($cm->id);
 //import css
 echo '<link rel="stylesheet" href="styles.css">';
 //import icons
-//echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">';
+echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">';
 
 //import blockly
 echo '<script src="./blockly/blockly_compressed.js"></script>
@@ -94,10 +94,13 @@ if (has_capability('mod/nextblocks:gradeitems', context_module::instance($cm->id
     $reportType = 2;
 }
 
+//We need the username of the user whose report we are viewing, and the username of the logged in user. they can be different, in the case when a teacher is viewing a student's report
 $user = $DB->get_record('user', array('id' => $userid));
-$username = $user->firstname . ' ' . $user->lastname;
+$reportSubjectUserName = $user->firstname . ' ' . $user->lastname;
 
-$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType, $username, $id]);
+$loggedInUserName = $USER->firstname . ' ' . $USER->lastname;
+
+$PAGE->requires->js_call_amd('mod_nextblocks/codeenv', 'init', [$tests_file_contents, $saved_workspace, $custom_blocks_json, 1, $reactions, $last_user_reaction, $reportType, $loggedInUserName, $id]);
 
 $PAGE->set_url('/mod/nextblocks/report.php', array('id' => $cm->id));
 $PAGE->set_title("Report " . format_string($moduleinstance->name));
@@ -143,7 +146,7 @@ if($data = $mform->get_data()) {
         'showSubmitButton' => false,
         'showGrader' => $showGrader,
         'graderForm' => $graderForm,
-        'studentName' => $student->firstname . ' ' . $student->lastname,
+        'studentName' => $reportSubjectUserName,
         'currentGrade' => $currentGrade,
         'maxGrade' => $maxGrade,
     ];

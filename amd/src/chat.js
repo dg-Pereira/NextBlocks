@@ -18,8 +18,8 @@ define([], function() {
             const socket = new WebSocket(serverUrl);
             socket.addEventListener("open", () => chatSetup(socket, userName, activityId, saveMessage));
             socket.addEventListener("message", (event) => appendMessage(event.data, activityId));
-            //socket.addEventListener("close", () => socketError(activityId, "Connection closed by server"));
-            //socket.addEventListener("error", () => socketError(activityId));
+            // Socket.addEventListener("close", () => socketError(activityId, "Connection closed by server"));
+            // socket.addEventListener("error", () => socketError(activityId));
         },
 
         /**
@@ -65,7 +65,8 @@ const appendMessage = function(message, activityId, isParsed = false) {
     if (activityId === message.activity) {
         const chatDiv = document.getElementById('messages');
         const timestampDate = new Date(message.timestamp);
-        chatDiv.innerHTML += `<p>(${timestampDate.getHours()}:${timestampDate.getMinutes()}) 
+        chatDiv.innerHTML +=
+            `<p>(${String(timestampDate.getHours()).padStart(2, '0')}:${String(timestampDate.getMinutes()).padStart(2, '0')})
             ${message.sender}: ${message.text}</p>`;
     }
 };

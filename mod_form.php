@@ -153,13 +153,13 @@ class mod_nextblocks_mod_form extends moodleform_mod {
 
         //<<------------------------------------------ Primitive Restricions tab ------------------------------------------>>//
 
-        $mform->addElement(
-            'header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks')
-        );
+        //$mform->addElement(
+        //    'header', 'primitiverestrictions', get_string('nextblockscreateprimitiverestrictions', 'mod_nextblocks')
+        //);
 
         //<<------------------------------------------ Timing tab ------------------------------------------>>//
 
-        $mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
+        //$mform->addElement('header', 'timing', get_string('nextblockscreatetiming', 'mod_nextblocks'));
 
         //<<------------------------------------------ Submissions tab ------------------------------------------>>//
 
